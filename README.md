@@ -58,3 +58,26 @@ albert-large
   tool_calls: [],
   reasoning_content: null
 }
+
+
+# slug
+- create file
+- https://forum.solidproject.org/t/my-first-app-adding-resources/275/2
+I think I can answer at least one of your questions - about the slug and the link:
+
+// add a file to a directory
+//
+var link = ‘http://www.w3.org/ns/ldp#Resource; rel=“type”’
+var filename = ‘myfile.ttl’
+var parentFolder = “https://me.solid.community/public/somepath/”
+var request = {
+method : ‘POST’,
+headers : { ‘Content-Type’:‘text/turtle’,slug:filename,link:link }
+}
+solid.auth.fetch( parentFolder, request ) // …
+
+and add body : content-of-the-file after headers to both create the file and add content in the same fetch.
+
+- create folder using .dummy file
+
+https://forum.solidproject.org/t/my-first-app-adding-resources/275/9

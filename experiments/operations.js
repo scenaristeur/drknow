@@ -15,6 +15,19 @@ console.log(`You are now logged in as ${session.info.webId}`);
 let res = await session.fetch("http://localhost:3000/david/profile/")
 console.log(await res.text())
 
+// https://forum.solidproject.org/t/my-first-app-adding-resources/275/14
+let post_folder = await session.fetch("http://localhost:3000/david/machin/logbook2/", {
+    method: 'PUT',
+    'Content-Type': 'text/turtle',
+    'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+    'Slug': 'logbook2'
+    // headers: { 'content-type': 'text/turtle' },
+    // body: "<ex:s> <ex:p> <ex:o>."
+}
+)
+// console.log("put_result_ttl: ",put_result_ttl)
+console.log("ok post_folder: ", post_folder)
+
 
 // curl -X PUT -H "Content-Type: text/plain"   -d "abc"   http://localhost:3000/david/myfile.txt
 let put_result_txt = await session.fetch("http://localhost:3000/david/myfile.txt", {
@@ -73,7 +86,16 @@ let post_result_json = await session.fetch("http://localhost:3000/david/", {
 )
 // console.log("post_result_json: ",post_result_json)
 console.log("ok post_result_json: ", post_result_json.ok)
-console.log("location: ", post_result_json.headers.get("location"))
+let location = post_result_json.headers.get("location")
+console.log("location: ", location)
+
+// curl -X DELETE http://localhost:3000/myfile.txt
+let delete_file = await session.fetch(location, {
+    method: 'DELETE'
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok delete_file: ", await delete_file.text())
 
 // curl -H "Accept: text/plain"   http://localhost:3000/myfile.txt
 // curl -H "Accept: text/turtle"   http://localhost:3000/myfile.ttl
@@ -86,7 +108,7 @@ let get_result_ttl = await session.fetch("http://localhost:3000/david/myfile.ttl
 console.log("ok get_result_ttl: ", await get_result_ttl.text())
 // console.log("location: ",post_result_json.headers.get("location"))
 // curl -H "Accept: application/ld+json"  http://localhost:3000/myfile.ttl
-// curl -X DELETE http://localhost:3000/myfile.txt
+
 /* curl -X PATCH -H "Content-Type: text/n3" \
   --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }." \
   http://localhost:3000/myfile.ttl
