@@ -169,10 +169,10 @@ class MCPClient {
         let calls = msg.content.split("[TOOL_CALLS]")
         console.log(calls)
         if (calls.length == 1) {
-            finalText += msg.content
+            finalText.push(msg.content)
         } else {
             if (calls[0].length > 0) {
-                finalText += calls[0]
+                finalText.push(calls[0])
             }
             calls.shift()
             // messages.append(msg.content)

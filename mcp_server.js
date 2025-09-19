@@ -37,7 +37,7 @@ server.registerTool("get_weather",
         // }
     },
     async ({ city }) => ({
-        content: [{ type: "text", text: String(JSON.stringify({ "city": city, "temp_c": 22, "condition": "Ensoleillé" })) }]
+        content: [{ type: "text", text: String(JSON.stringify({ "city": city, "temp_c": Math.floor(Math.random() * 40), "condition": "Ensoleillé" })) }]
     })
 );
 
