@@ -20,6 +20,27 @@ server.registerTool("add",
     })
 );
 
+server.registerTool("get_weather",
+    {
+        title: "get_weather",
+        description: "Obtenir la météo actuelle pour une ville donnée",
+        inputSchema: { city: z.string() }
+        // inputSchema: {
+        //     "type": "object",
+        //     "properties": {
+        //         "city": {
+        //             "type": "string",
+        //             "description": "Nom de la ville, ex: 'Paris'"
+        //         }
+        //     },
+        //     "required": ["city"]
+        // }
+    },
+    async ({ city }) => ({
+        content: [{ type: "text", text: String(JSON.stringify({ "city": city, "temp_c": 22, "condition": "Ensoleillé" })) }]
+    })
+);
+
 // Add a dynamic greeting resource
 server.registerResource(
     "greeting",
