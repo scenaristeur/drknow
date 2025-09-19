@@ -1,0 +1,157 @@
+import { Session } from "@inrupt/solid-client-authn-node";
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '../.env' })
+const session = new Session();
+await session.login({
+    oidcIssuer: process.env.OPENID_PROVIDER,
+    clientId: process.env.TOKEN_IDENTIFIER,
+    clientSecret: process.env.TOKEN_SECRET,
+});
+
+console.log(`You are now logged in as ${session.info.webId}`);
+// console.log(session)
+
+let res = await session.fetch("http://localhost:3000/david/profile/")
+console.log(await res.text())
+
+
+// curl -X PUT -H "Content-Type: text/plain"   -d "abc"   http://localhost:3000/david/myfile.txt
+let put_result_txt = await session.fetch("http://localhost:3000/david/myfile.txt", {
+    method: 'PUT',
+    headers: { 'content-type': 'text/plain' },
+    body: "test de data 2"
+}
+)
+// console.log("put_result_txt: ",put_result_txt)
+console.log("ok put_result_txt: ", put_result_txt.ok)
+
+// curl -X PUT -H "Content-Type: text/turtle"   -d "<ex:s> <ex:p> <ex:o>."   http://localhost:3000/myfile.ttl
+let put_result_ttl = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'PUT',
+    headers: { 'content-type': 'text/turtle' },
+    body: "<ex:s> <ex:p> <ex:o>."
+}
+)
+// console.log("put_result_ttl: ",put_result_ttl)
+console.log("ok put_result_ttl: ", put_result_ttl.ok)
+
+// curl -X PUT -H "Content-Type: text/turtle"   -d "<ex:s> <ex:p> <ex:o>."   http://localhost:3000/myfile.ttl
+let put_result_json = await session.fetch("http://localhost:3000/david/myfile.json", {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ truc: "ll" }),
+}
+)
+// console.log("put_result_json: ",put_result_json)
+console.log("ok put_result_json: ", put_result_json.ok)
+
+const lennon = {
+    "@context": "https://json-ld.org/contexts/person.jsonld",
+    "@id": "http://dbpedia.org/resource/John_Lennon",
+    "name": "John Lennon",
+    "born": "1940-10-09",
+    "spouse": "http://dbpedia.org/resource/Cynthia_Lennon"
+}
+
+let put_result_json_ld = await session.fetch("http://localhost:3000/david/folder/myfile.ld.json", {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(lennon),
+}
+)
+// console.log("put_result_json_ld: ",put_result_json_ld)
+console.log("ok put_result_json_ld: ", put_result_json_ld.ok)
+
+// curl -X POST -H "Content-Type: text/plain"   -d "abc"   http://localhost:3000/
+
+let post_result_json = await session.fetch("http://localhost:3000/david/", {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ truc: "ll" }),
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok post_result_json: ", post_result_json.ok)
+console.log("location: ", post_result_json.headers.get("location"))
+
+// curl -H "Accept: text/plain"   http://localhost:3000/myfile.txt
+// curl -H "Accept: text/turtle"   http://localhost:3000/myfile.ttl
+let get_result_ttl = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'GET',
+    headers: { 'accept': 'text/turtle' }
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok get_result_ttl: ", await get_result_ttl.text())
+// console.log("location: ",post_result_json.headers.get("location"))
+// curl -H "Accept: application/ld+json"  http://localhost:3000/myfile.ttl
+// curl -X DELETE http://localhost:3000/myfile.txt
+/* curl -X PATCH -H "Content-Type: text/n3" \
+  --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }." \
+  http://localhost:3000/myfile.ttl
+  */
+let patch_n3 = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'PATCH',
+    headers: { 'content-type': 'text/n3' },
+    body: "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }."
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok patch_n3: ", await patch_n3.text())
+
+let get_result_ttl2 = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'GET',
+    headers: { 'accept': 'text/turtle' }
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok get_result_ttl2: ", await get_result_ttl2.text())
+// console.log("location: ",post_result_json.headers.get("location"))
+/*
+curl -X PATCH -H "Content-Type: application/sparql-update" \
+ -d "INSERT DATA { <ex:s2> <ex:p2> <ex:o2> }" \
+ http://localhost:3000/myfile.ttl
+ */
+
+let sparql_update = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/sparql-update' },
+    body: "INSERT DATA { <ex:s3> <ex:p3> <ex:o3> }"
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok sparql_update: ", await sparql_update.text())
+
+let get_result_ttl3 = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'GET',
+    headers: { 'accept': 'text/turtle' }
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok get_result_ttl3: ", await get_result_ttl3.text())
+
+
+let get_result_ttl3_json = await session.fetch("http://localhost:3000/david/myfile.ttl", {
+    method: 'GET',
+    headers: { 'accept': 'application/json' }
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok get_result_ttl3_json: ", await get_result_ttl3_json.json())
+/*
+curl -I -H "Accept: text/plain" \
+ http://localhost:3000/myfile.txt
+ */
+// curl -X OPTIONS -i http://localhost:3000/myfile.txt
+
+
+let list_folder = await session.fetch("http://localhost:3000/david/", {
+    method: 'GET',
+    headers: { 'accept': 'application/json' }
+}
+)
+// console.log("post_result_json: ",post_result_json)
+console.log("ok list_folder: ", await list_folder.json())
+
+await session.logout();
