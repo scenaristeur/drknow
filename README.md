@@ -32,6 +32,8 @@ node assistant.js mcp_server.js
 
 quel temps fait-il à Lyon, Bordeaux et Marseille ?
 
+quels documents sont présents sur le serveur, dans le dossier 'david' ?
+
 # reponse 
 albert-small
 {
