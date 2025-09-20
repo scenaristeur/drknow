@@ -6,29 +6,60 @@ let session = await op.init()
 console.log("session.info", session.info)
 console.log("op.pod:", op.pod)
 
-// import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
+
+let options = {
+    path: "holacratie/",
+    structure: {
+        root_folders: ["constitution", "organisations", "acteurs", "partenaires"],
+        organisations: ["premier_cercle", "tensions", "projets", "prochaines_actions", "domaines"]
+    },
+    data: {
+        organisations: [
+            { "name": "Château des Robots", folder: "chateau_des_robots", shortname: "cdr", description: "Lieu de départ des expeditions vers le Monde Numérique." },
+            { "name": "Village des Constructeurs de navires", folder: "navcovi", shortname: "ncv", description: "Village où le navires pour le monde Numerique sont construits. Se situe à proximité du Château des Robots." },
+            { "name": "Monde Numérique", folder: "monde_numerique", shortname: "mn", description: "Le Monde Numérique. Un monde à explorer" },
+            { "name": "Guilde des explorateurs", folder: "guilde_explorateurs", shortname: "guildx", description: "Précedemment rattachée au Château des Robots, la guilde des Explorateurs assure le bon déroulement des explorations du Monde Numérique" },
+            { "name": "Académie du Château des Robots", folder: "academie_cdr", shortname: "acad", description: "Lieu d'apprentissage, de partage de savoir au sujet du monde numerique, et du monde réel." }
+        ]
+    }
 
 
-
-
-let options = { path: "holacratie/" }
+}
 await testHolacratie(options)
 
 async function testHolacratie(options) {
     console.log(options)
-    let root_folders = ["constitution", "organisations", "acteurs", "partenaires"]
 
-    // let res = await session.fetch(session.info.webId)
-    // console.log(await res.text())
+
     if (session.info.isLoggedIn) {
         op.pod.hola_root = op.pod.storage + options.path
 
-        for await (const rf of root_folders) {
+        for await (const rf of options.structure.root_folders) {
             let path = op.pod.hola_root + rf + '/'
             await op.mkdir(path)
             op.pod[rf] = path
         }
-        console.log(op.pod)
+
+        op.pod.organisations_list = {}
+        for await (const org of options.data.organisations) {
+            org.path = op.pod.organisations + org.folder + '/'
+            await op.mkdir(org.path)
+            op.pod.organisations_list[org.shortname] = org
+        }
+
+        for await (const [short, orga] of Object.entries(op.pod.organisations_list)) {
+            op.pod.organisations_list[short].folders = {}
+            console.log('\n------------------\n', short, orga);
+            for await (const sub_folder of options.structure.organisations) {
+                let folder = orga.path + sub_folder + '/'
+                await op.mkdir(folder)
+                op.pod.organisations_list[short].folders[sub_folder] = folder
+            }
+            // org.path = op.pod.organisations + org.folder + '/'
+            // await op.mkdir(org.path)
+            // op.pod.organisations_list[org.shortname] = org
+        }
+        console.log("op.pod:", op.pod)
         // pod.constitution = hola_root + 'constitution/'
         // await create_folder(pod.constituion)
         // uploadFile('../doc/Constitution-Holacracy.md', "text/markdown", `${hola_root}constitution/Constitution-Holacracy.md`, session.fetch);
