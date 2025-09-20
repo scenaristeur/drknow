@@ -1,3 +1,6 @@
+# mise en condition
+- règle numero 1: Ne rien commencer sans avoir de la bonne musique : https://www.radiofrance.fr/fip/radio-groove
+
 # Community solid server
 - https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/starting-server/
 
@@ -24,11 +27,11 @@ node operations.js
 # run
 Lancement de l'assistant avec le serveur mcp
 
-node assistant.js mcp_server.js
+`node assistant.js mcp_server.js`
 
-quel temps fait-il à Lyon, Bordeaux et Marseille ?
+> quel temps fait-il à Lyon, Bordeaux et Marseille ?
 
-quels documents sont présents sur le serveur, dans le dossier 'david' ?
+> quels documents sont présents sur le serveur, dans le dossier 'david' ?
 
 # reponse 
 albert-small
