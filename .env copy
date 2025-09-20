@@ -1,0 +1,7 @@
+TOKEN_IDENTIFIER=my_token_xxx
+TOKEN_SECRET=xxx
+OPENID_PROVIDER=http://localhost:3000
+OPENAI_API_KEY=sk-xxx
+OPENAI_BASE_URL="https://provider.domain/v1"
+MODEL="model"
+

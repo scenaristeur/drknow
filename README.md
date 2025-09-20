@@ -19,11 +19,6 @@ cd experiments
 node operations.js
 ```
 
-# mcp
-- https://www.youtube.com/watch?v=Ek8JHgZtmcI scratch
-- https://www.youtube.com/watch?v=mhdGVbJBswA usage
-- client https://modelcontextprotocol.info/docs/tutorials/building-a-client-node/
-- https://medium.com/@__nagarajan__/building-and-accessing-local-mcp-server-using-open-ai-agent-with-node-js-5cbe626145eb
 
 
 # run
@@ -85,3 +80,9 @@ https://forum.solidproject.org/t/my-first-app-adding-resources/275/9
 
 # inrupt CRUD
 - https://docs.inrupt.com/sdk/javascript-sdk/read-and-write-files
+
+# mcp
+- https://www.youtube.com/watch?v=Ek8JHgZtmcI scratch
+- https://www.youtube.com/watch?v=mhdGVbJBswA usage
+- client https://modelcontextprotocol.info/docs/tutorials/building-a-client-node/
+- https://medium.com/@__nagarajan__/building-and-accessing-local-mcp-server-using-open-ai-agent-with-node-js-5cbe626145eb
