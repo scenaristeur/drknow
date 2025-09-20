@@ -1,27 +1,14 @@
-import { Session } from "@inrupt/solid-client-authn-node";
-import { readFile } from 'fs/promises';
-import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
-import dotenv from 'dotenv'
+import { SolidOperations } from "../src/solidOperations.js"
 
-import parseUrl from '../src/utils/urlParser.js';
+let envFile = '../.env'
+let op = new SolidOperations({ envFile })
+let session = await op.init()
+console.log("session.info", session.info)
+console.log("op.pod:", op.pod)
 
-const default_acl = "./acls/.acl"
-
-dotenv.config({ path: '../.env' })
-const session = new Session();
-await session.login({
-    oidcIssuer: process.env.OPENID_PROVIDER,
-    clientId: process.env.TOKEN_IDENTIFIER,
-    clientSecret: process.env.TOKEN_SECRET,
-});
-
-console.log(`You are now logged in as ${session.info.webId}`);
+// import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
 
 
-let pod = parseUrl(session.info.webId)
-console.log(pod)
-
-//await test1()
 
 
 let options = { path: "holacratie/" }
@@ -34,14 +21,14 @@ async function testHolacratie(options) {
     // let res = await session.fetch(session.info.webId)
     // console.log(await res.text())
     if (session.info.isLoggedIn) {
-        pod.hola_root = pod.storage + options.path
+        op.pod.hola_root = op.pod.storage + options.path
 
         for await (const rf of root_folders) {
-            let path = pod.hola_root + rf + '/'
-            await create_folder(path)
-            pod[rf] = path
+            let path = op.pod.hola_root + rf + '/'
+            await op.mkdir(path)
+            op.pod[rf] = path
         }
-        await console.log(pod)
+        console.log(op.pod)
         // pod.constitution = hola_root + 'constitution/'
         // await create_folder(pod.constituion)
         // uploadFile('../doc/Constitution-Holacracy.md', "text/markdown", `${hola_root}constitution/Constitution-Holacracy.md`, session.fetch);
@@ -53,36 +40,7 @@ async function testHolacratie(options) {
 
 }
 
-async function create_folder(path) {
-    var parts = path.split('/');
-    var slug = parts.pop() || parts.pop();
 
-    let post_folder = await session.fetch(path, {
-        method: 'PUT',
-        'Content-Type': 'text/turtle',
-        'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
-        'Slug': slug
-        // headers: { 'content-type': 'text/turtle' },
-        // body: "<ex:s> <ex:p> <ex:o>."
-    }
-    )
-    // console.log("put_result_ttl: ",put_result_ttl)
-    console.log(post_folder.status, "[post_folder]", path)
-    await setAcl(path)
-    return post_folder
-}
-
-async function setAcl(path, acl_string) {
-    if (acl_string == undefined) {
-        acl_string = await readFile(default_acl);
-    }
-    let put_acl = await session.fetch(path + ".acl", {
-        method: 'PUT',
-        headers: { 'content-type': 'text/turtle' },
-        body: acl_string
-    })
-    console.log(put_acl.status, "[put_acl]", path + ".acl")
-}
 
 // Read local file and save to targetURL
 async function uploadFile(filepath, mimetype, targetURL, fetch) {

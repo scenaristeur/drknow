@@ -11,20 +11,26 @@ import { fetchOperation } from './src/utils/fetchOperations.js';
 
 dotenv.config({ path: '.env' })
 const session = new Session();
-await session.login({
-    oidcIssuer: process.env.OPENID_PROVIDER,
-    clientId: process.env.TOKEN_IDENTIFIER,
-    clientSecret: process.env.TOKEN_SECRET,
-});
+try {
 
-console.log(`You are now logged in as ${session.info.webId}`);
-// console.log(session)
-let webId = session.info.webId
+    await session.login({
+        oidcIssuer: process.env.OPENID_PROVIDER,
+        clientId: process.env.TOKEN_IDENTIFIER,
+        clientSecret: process.env.TOKEN_SECRET,
+    });
 
-// let res = await session.fetch("http://localhost:3000/david/profile/")
-// console.log(await res.text())
-let pod = parseUrl(webId)
-console.log(pod)
+    console.log(`You are now logged in as ${session.info.webId}`);
+    // console.log(session)
+    let webId = session.info.webId
+
+    // let res = await session.fetch("http://localhost:3000/david/profile/")
+    // console.log(await res.text())
+    let pod = parseUrl(webId)
+    console.log(pod)
+
+} catch (e) {
+    console.log("serveur Solid non disponible")
+}
 
 
 // Create an MCP server
