@@ -1,24 +1,24 @@
-import { Session } from "@inrupt/solid-client-authn-node";
+// import { Session } from "@inrupt/solid-client-authn-node";
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '../../.env' });
 
-const session = new Session();
+// const session = new Session();
 
-async function login() {
-    await session.login({
-        oidcIssuer: process.env.OPENID_PROVIDER,
-        clientId: process.env.TOKEN_IDENTIFIER,
-        clientSecret: process.env.TOKEN_SECRET,
-    });
-    console.log(`You are now logged in as ${session.info.webId}`);
-}
+// async function login() {
+//     await session.login({
+//         oidcIssuer: process.env.OPENID_PROVIDER,
+//         clientId: process.env.TOKEN_IDENTIFIER,
+//         clientSecret: process.env.TOKEN_SECRET,
+//     });
+//     console.log(`You are now logged in as ${session.info.webId}`);
+// }
 
-async function logout() {
-    await session.logout();
-}
+// async function logout() {
+//     await session.logout();
+// }
 
-async function fetchOperation(method, url, data = null, contentType = 'text/plain', acceptType = null) {
+async function fetchOperation(session, method, url, data = null, contentType = 'text/plain', acceptType = null) {
     let headers = { 'Content-Type': contentType };
     if (acceptType) {
         headers['Accept'] = acceptType;
@@ -45,4 +45,4 @@ async function fetchOperation(method, url, data = null, contentType = 'text/plai
     }
 }
 
-export { login, logout, fetchOperation };
+export { fetchOperation };

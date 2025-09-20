@@ -5,6 +5,10 @@ import { z } from "zod";
 import { Session } from "@inrupt/solid-client-authn-node";
 import dotenv from 'dotenv'
 
+import parseUrl from './src/utils/urlParser.js';
+import { fetchOperation } from './src/utils/fetchOperations.js';
+
+
 dotenv.config({ path: '.env' })
 const session = new Session();
 await session.login({
@@ -15,9 +19,13 @@ await session.login({
 
 console.log(`You are now logged in as ${session.info.webId}`);
 // console.log(session)
+let webId = session.info.webId
 
-let res = await session.fetch("http://localhost:3000/david/profile/")
-console.log(await res.text())
+// let res = await session.fetch("http://localhost:3000/david/profile/")
+// console.log(await res.text())
+let pod = parseUrl(webId)
+console.log(pod)
+
 
 // Create an MCP server
 const server = new McpServer({
@@ -26,71 +34,22 @@ const server = new McpServer({
 });
 
 
-async function getData(url) {
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log(result);
-        return result
-    } catch (error) {
-        console.error(error.message);
-        return error.message
-    }
-}
-
-// Add an addition tool
-server.registerTool("add",
-    {
-        title: "Addition Tool",
-        description: "Add two numbers",
-        inputSchema: { a: z.number(), b: z.number() }
-    },
-    async ({ a, b }) => ({
-        content: [{ type: "text", text: String(a + b) }]
-    })
-);
-
 server.registerTool("get_weather",
     {
         title: "get_weather",
         description: "Obtenir la météo actuelle pour une ville donnée",
         inputSchema: { city: z.string() }
-        // inputSchema: {
-        //     "type": "object",
-        //     "properties": {
-        //         "city": {
-        //             "type": "string",
-        //             "description": "Nom de la ville, ex: 'Paris'"
-        //         }
-        //     },
-        //     "required": ["city"]
-        // }
     },
     async ({ city }) => ({
         content: [{ type: "text", text: String(JSON.stringify({ "city": city, "temp_c": Math.floor(Math.random() * 40), "condition": "Ensoleillé" })) }]
     })
 );
 
-server.registerTool("list_solid_resources",
+server.registerTool("get_folder",
     {
-        title: "list_solid_resources",
+        title: "get_folder",
         description: "Lister les resources disponibles sur un serveur Solid",
         inputSchema: { path: z.string() }
-        // inputSchema: {
-        //     "type": "object",
-        //     "properties": {
-        //         "city": {
-        //             "type": "string",
-        //             "description": "Nom de la ville, ex: 'Paris'"
-        //         }
-        //     },
-        //     "required": ["city"]
-        // }
     },
     async ({ path }) => {
         let url = "http://localhost:3000/" + path + '/'
@@ -103,27 +62,28 @@ server.registerTool("list_solid_resources",
         let folder_list = await list_folder.json()
         console.log("ok list_folder: ", folder_list)
 
-
         let content = [{ type: "text", text: String(JSON.stringify({ folder_list: folder_list, url: url })) }]
         return { content: content }
-
     }
 );
 
-// Add a dynamic greeting resource
-server.registerResource(
-    "greeting",
-    new ResourceTemplate("greeting://{name}", { list: undefined }),
+server.registerTool("create_folder",
     {
-        title: "Greeting Resource",      // Display name for UI
-        description: "Dynamic greeting generator"
+        title: "Create Folder",
+        description: "Creer un nouveau dossier {slug} dans le dossier {path} sur un serveur Solid, dans http://localhost:3000/{path}/{slug}/",
+        inputSchema: { path: z.string(), slug: z.string() }
     },
-    async (uri, { name }) => ({
-        contents: [{
-            uri: uri.href,
-            text: `Hello, ${name}!`
-        }]
-    })
+    async ({ path, slug }) => {
+        let url = "http://localhost:3000/" + path + '/'
+        let headers = {
+            'Content-Type': 'text/turtle',
+            'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+            'Slug': slug
+        };
+        let result = await fetchOperation(session, 'PUT', url, null, headers);
+        console.log("ok post_folder: ", result);
+        return { content: [{ type: "text", text: String(result) }] };
+    }
 );
 
 // Start receiving messages on stdin and sending messages on stdout

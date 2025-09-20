@@ -7,59 +7,10 @@ import dotenv from 'dotenv'
 dotenv.config({ path: './.env' })
 
 
-// let tools = [
-//     {
-//         "type": "function",
-//         "function": {
-//             "name": "get_weather",
-//             "description": "Obtenir la météo actuelle pour une ville donnée",
-//             "parameters": {
-//                 "type": "object",
-//                 "properties": {
-//                     "city": {
-//                         "type": "string",
-//                         "description": "Nom de la ville, ex: 'Paris'"
-//                     }
-//                 },
-//                 "required": ["city"]
-//             }
-//         }
-//     },
-//     {
-//         "type": "function",
-//         "function": {
-//             "name": "get_air_quality",
-//             "description": "Obtenir l'indice de qualité de l'air (AQI) pour une ville donnée",
-//             "parameters": {
-//                 "type": "object",
-//                 "properties": {
-//                     "city": {
-//                         "type": "string",
-//                         "description": "Nom de la ville"
-//                     }
-//                 },
-//                 "required": ["city"]
-//             }
-//         }
-//     }
-// ]
-
-// // Implémentations des tools
-// function get_weather(city) {
-//     return { "city": city, "temp_c": 22, "condition": "Ensoleillé" }
-// }
-
-
-// function get_air_quality(city) {
-//     return { "city": city, "aqi": 42, "level": "Bon" }
-// }
-
-
-// let tool_registry = {
-//     "get_weather": get_weather,
-//     "get_air_quality": get_air_quality,
-// }
-
+const messages = [{
+    role: "system",
+    content: "tu es en expert RDF, jsonld, turtle/n3. tu as accès des outils pour interagir avec des serveurs Solid"
+}]
 
 class MCPClient {
 
@@ -92,12 +43,6 @@ class MCPClient {
 
             const toolsResult = await this.mcp.listTools();
             this.tools = toolsResult.tools.map((tool) => {
-
-                // return {
-                //     name: tool.name,
-                //     description: tool.description,
-                //     input_schema: tool.inputSchema,
-                // };
                 return {
                     "type": "function",
                     "function": {
@@ -109,9 +54,9 @@ class MCPClient {
             });
             console.log(
                 "Connected to server with tools:",
-                this.tools.map(({ name }) => name)
+                this.tools.map((tool) => tool.function.name)
             );
-            console.log(JSON.stringify(this.tools, null, 2))
+            // console.log(JSON.stringify(this.tools, null, 2))
         } catch (e) {
             console.log("Failed to connect to MCP server: ", e);
             throw e;
@@ -142,12 +87,11 @@ class MCPClient {
     }
 
     async processQuery(query) {
-        const messages = [
+        messages.push(
             {
                 role: "user",
                 content: query,
-            },
-        ];
+            })
 
         const response = await this.client.chat.completions.create({
             model: process.env['MODEL'],

@@ -8,7 +8,7 @@ community-solid-server -c @css:config/file.json -f data/
 ```
 - open localhost:3000
 - register
-- login
+- login http://localhost:3000/.account/login/
 - create pod
 - create token
 - update .env
@@ -27,6 +27,7 @@ node operations.js
 
 
 # run
+Lancement de l'assistant avec le serveur mcp
 
 node assistant.js mcp_server.js
 
@@ -81,3 +82,6 @@ and add body : content-of-the-file after headers to both create the file and add
 - create folder using .dummy file
 
 https://forum.solidproject.org/t/my-first-app-adding-resources/275/9
+
+# inrupt CRUD
+- https://docs.inrupt.com/sdk/javascript-sdk/read-and-write-files
