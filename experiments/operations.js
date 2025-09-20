@@ -12,9 +12,9 @@ let options = {
     structure: {
         root_folders: ["constitution", "organisations", "acteurs", "partenaires"],
         organisations: [
-            { name: "Premier_cercle" },
+            { name: "premier_cercle", label: "Premier_cercle" },
             {
-                name: "Tensions", schema: [
+                name: "tension", label: "Tensions", schema: [
                     { name: "what_is", type: "string" },
                     { name: "what_should_be", type: "string" },
                     { name: "role", type: "string" },
@@ -22,10 +22,10 @@ let options = {
                 ]
             },
             {
-                name: "Projets"
+                name: "projets", label: "Projets"
             },
             {
-                name: "Prochaines_actions", schema: [
+                name: "prochaines_actions", label: "Prochaines_actions", schema: [
                     { name: "action", type: "string" },
                     { name: "role", type: "string" },
                     { name: "description", type: "string" },
@@ -34,11 +34,12 @@ let options = {
                 ]
             },
             {
-                name: "Roles", schema: [
+                name: "roles", label: "Roles", schema: [
                     { name: "name", type: "string" },
                     { name: "raison_etre", type: "string" },
                     { name: "domaines", type: "array" },
-                    { name: "redevabilites", type: "array" }
+                    { name: "redevabilites", type: "array" },
+                    { name: "tensions", type: "array" }
                 ]
             },
             {
@@ -65,12 +66,52 @@ let options = {
     },
     data: {
         organisations: [
-            { "name": "Château des Robots", folder: "chateau_des_robots", shortname: "cdr", description: "Lieu de départ des expeditions vers le Monde Numérique." },
+            {
+                "name": "Château des Robots",
+                folder: "chateau_des_robots",
+                shortname: "cdr",
+                description: "Lieu de départ des expeditions vers le Monde Numérique.",
+                roles: [{
+                    name: "accueil",
+                    label: "Accueil",
+                    raison_etre: "Accueillir les visiteur, leur expliquer le fonctionnement du Château des Robots, et les guider. Leur proposer de s'abonner à la newsletter pour rester informé, leur proposer une première expérience en visitant l'Académie, ou le musée des explorations, ou en rencontrant des explorateurs à la Taverne...",
+                    domaines: ["arrivee_au_chateau", "newsletter", "flyers"],
+                    redevabilites: [],
+                    tensions: []
+                },
+                {
+                    name: "guide",
+                    label: "Guide",
+                    raison_etre: "Prendre en charge et suivre la progression des apprentis explorateurs",
+                    domaines: ["guidage", "aide_aux_explorateurs", "accompagnement"],
+                    redevabilites: [],
+                    tensions: []
+                },
+                {
+                    name: "apprenti_explorateur",
+                    label: "Apprenti Explorateur",
+                    raison_etre: "Découvrir le Monde Numérique",
+                    domaines: ["exploration", "apprentissage"],
+                    redevabilites: [],
+                    tensions: []
+                },
+                {
+                    name: "explorateur",
+                    label: "Explorateur",
+                    raison_etre: "Partager le Monde Numérique",
+                    domaines: ["enseignement", "accompagnement"],
+                    redevabilites: [],
+                    tensions: []
+                }
+
+                ]
+            },
             { "name": "Village des Constructeurs de navires", folder: "navcovi", shortname: "ncv", description: "Village où le navires pour le monde Numerique sont construits. Se situe à proximité du Château des Robots." },
             { "name": "Monde Numérique", folder: "monde_numerique", shortname: "mn", description: "Le Monde Numérique. Un monde à explorer" },
             { "name": "Guilde des explorateurs", folder: "guilde_explorateurs", shortname: "guildx", description: "Précedemment rattachée au Château des Robots, la guilde des Explorateurs assure le bon déroulement des explorations du Monde Numérique" },
             { "name": "Académie du Château des Robots", folder: "academie_cdr", shortname: "acad", description: "Lieu d'apprentissage, de partage de savoir au sujet du monde numerique, et du monde réel." }
-        ]
+        ],
+
     }
 
 
@@ -115,13 +156,36 @@ async function testHolacratie(options) {
                     }
                     await op.fetch(method, url, headers, body)
                 }
+                if (orga[sub_folder.name] != undefined) {
+                    for await (const entite of orga[sub_folder.name]) {
+                        let url = folder + entite.name
+                        let method = 'PUT'
+                        let headers = { 'content-type': 'text/turtle' }
+                        let body = ""
+                        // for (const f of sub_folder.schema) {
+                        for (const [key, val] of Object.entries(entite)) {
+                            // let pred = f.type == "string" ? "<hola:has>" : "<hola:has_many>"
+                            if (Array.isArray(val)) {
+                                for (const v of val) {
+                                    body += "<hola:" + entite.name + "> < hola:" + key + "> <hola:" + v + ">.\n"
+                                }
+
+                            } else {
+                                body += "<hola:" + entite.name + "> < hola:" + key + "> <hola:" + val + ">.\n"
+
+                            }
+                        }
+                        console.log("body", body)
+                        await op.fetch(method, url, headers, body)
+                    }
+
+                }
+
 
 
 
             }
-            // org.path = op.pod.organisations + org.folder + '/'
-            // await op.mkdir(org.path)
-            // op.pod.organisations_list[org.shortname] = org
+
         }
         console.log("op.pod:", op.pod)
         // pod.constitution = hola_root + 'constitution/'
