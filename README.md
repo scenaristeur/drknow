@@ -1,5 +1,9 @@
 # mise en condition
 - règle numero 1: Ne rien commencer sans avoir de la bonne musique : https://www.radiofrance.fr/fip/radio-groove
+et notamment https://www.radiofrance.fr/fip/podcasts/fip-tape/wish-you-were-here-de-pink-floyd-fete-ses-50-ans-5851747
+
+Bon maintenant que l'on est bien calé, passons aux choses sérieuses : 
+un serveur Solid
 
 # Community solid server
 - https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/starting-server/
@@ -32,6 +36,10 @@ Lancement de l'assistant avec le serveur mcp
 > quel temps fait-il à Lyon, Bordeaux et Marseille ?
 
 > quels documents sont présents sur le serveur, dans le dossier 'david' ?
+
+
+# Holacratie
+- https://github.com/holacracyone/Holacracy-Constitution-4.1-FRENCH/blob/master/Constitution-Holacracy.md
 
 # reponse 
 albert-small

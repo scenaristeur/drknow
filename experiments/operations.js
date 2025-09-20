@@ -11,7 +11,57 @@ let options = {
     path: "holacratie/",
     structure: {
         root_folders: ["constitution", "organisations", "acteurs", "partenaires"],
-        organisations: ["premier_cercle", "tensions", "projets", "prochaines_actions", "domaines"]
+        organisations: [
+            { name: "Premier_cercle" },
+            {
+                name: "Tensions", schema: [
+                    { name: "what_is", type: "string" },
+                    { name: "what_should_be", type: "string" },
+                    { name: "role", type: "string" },
+                    { name: "proposition", type: "string" }
+                ]
+            },
+            {
+                name: "Projets"
+            },
+            {
+                name: "Prochaines_actions", schema: [
+                    { name: "action", type: "string" },
+                    { name: "role", type: "string" },
+                    { name: "description", type: "string" },
+                    { name: "avancement", type: "string" },
+                    // blocage ? contrainte
+                ]
+            },
+            {
+                name: "Roles", schema: [
+                    { name: "name", type: "string" },
+                    { name: "raison_etre", type: "string" },
+                    { name: "domaines", type: "array" },
+                    { name: "redevabilites", type: "array" }
+                ]
+            },
+            {
+                name: "domaines"
+            },
+            {
+                name: "associes"
+            },
+            {
+                name: "autorites"
+            },
+            {
+                name: "gouvernance"
+            },
+            {
+                name: "fourre_tout"
+            },
+            {
+                name: "obligations"
+            },
+            { name: "raison_etre" },
+            { name: "contraintes" }
+        ]
     },
     data: {
         organisations: [
@@ -51,9 +101,23 @@ async function testHolacratie(options) {
             op.pod.organisations_list[short].folders = {}
             console.log('\n------------------\n', short, orga);
             for await (const sub_folder of options.structure.organisations) {
-                let folder = orga.path + sub_folder + '/'
+                let folder = orga.path + sub_folder.name + '/'
                 await op.mkdir(folder)
                 op.pod.organisations_list[short].folders[sub_folder] = folder
+                if (sub_folder.schema != undefined) {
+                    let url = folder + "schema.ttl"
+                    let method = 'PUT'
+                    let headers = { 'content-type': 'text/turtle' }
+                    let body = ""
+                    for (const f of sub_folder.schema) {
+                        let pred = f.type == "string" ? "<hola:has>" : "<hola:has_many>"
+                        body += "<hola:" + short + "> " + pred + " <hola:" + f.name + ">.\n"
+                    }
+                    await op.fetch(method, url, headers, body)
+                }
+
+
+
             }
             // org.path = op.pod.organisations + org.folder + '/'
             // await op.mkdir(org.path)

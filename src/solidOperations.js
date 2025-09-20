@@ -49,4 +49,15 @@ export class SolidOperations {
         console.log(put_acl.status, "[put_acl]", path + ".acl")
     }
 
+    async fetch(method, url, headers, body) {
+        let fetch_result = await this.session.fetch(url, {
+            method: method,
+            headers: headers,
+            body: body
+        }
+        )
+        // console.log("put_result_ttl: ",put_result_ttl)
+        console.log(fetch_result.status, "[" + method + "]", url)
+    }
+
 }
