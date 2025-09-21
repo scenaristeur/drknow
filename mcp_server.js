@@ -74,7 +74,8 @@ server.registerTool("get_folder",
             return { content: content }
         }
         catch (e) {
-            return { content: e }
+            let content = [{ type: "text", text: String(JSON.stringify(e)) }]
+            return { content: content }
         }
     }
 );
@@ -86,15 +87,27 @@ server.registerTool("create_folder",
         inputSchema: { path: z.string(), slug: z.string() }
     },
     async ({ path, slug }) => {
-        let url = "http://localhost:3000/" + path + '/'
-        let headers = {
-            'Content-Type': 'text/turtle',
-            'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
-            'Slug': slug
-        };
-        let result = await fetchOperation(session, 'PUT', url, null, headers);
-        console.log("ok post_folder: ", result);
-        return { content: [{ type: "text", text: String(result) }] };
+        try {
+            let full_url = "http://localhost:3000/" + path + '/' + slug + '/'
+            let headers = {
+                'Content-Type': 'text/turtle',
+                'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+                'Slug': slug
+            };
+            // let result = await fetchOperation(session, 'PUT', url, null, headers);
+            let folder_create = await session.fetch(full_url, {
+                method: 'PUT',
+                headers: headers
+            })
+            console.log("ok post_folder: ", result);
+            // return { content: [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }] };
+            let content = [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }]
+            console.log("THE CONTENT:", content)
+            return { content: content }
+        } catch (e) {
+            let content = [{ type: "text", text: String(JSON.stringify(e)) }]
+            return { content: content }
+        }
     }
 );
 

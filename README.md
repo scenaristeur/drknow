@@ -101,7 +101,7 @@ https://forum.solidproject.org/t/my-first-app-adding-resources/275/9
 
 
 # exemple serveur mcp avec Solid community server
-
+- get_folder
 ```
 ~/dev/drknow$ node assistant.js mcp_server.js 
 [dotenv@17.2.2] injecting env (6) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
@@ -397,4 +397,161 @@ Voici les acteurs identifiés dans l'organisation "chateau_des_robots" :
 Souhaitez-vous plus d'informations sur l'un de ces acteurs ou une autre action à entreprendre ?
 
 Query: 
+```
+
+
+- create_folder
+
+```
+ node assistant.js mcp_server.js 
+[dotenv@17.2.2] injecting env (6) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
+{
+  messages: [
+    {
+      role: 'system',
+      content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+        `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+        `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+        `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+        "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+        'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+    }
+  ]
+}
+[
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  }
+]
+Connected to server with tools: [ 'get_weather', 'get_folder', 'create_folder' ]
+
+MCP Client Started!
+Type your queries or 'quit' to exit.
+
+Query: dossiers ?
+{
+  id: 'chatcmpl-46c491905ea74ce2bca9f9d669934937',
+  object: 'chat.completion',
+  created: 1758455736,
+  model: 'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
+  choices: [
+    {
+      index: 0,
+      message: [Object],
+      logprobs: null,
+      finish_reason: 'stop',
+      stop_reason: null
+    }
+  ],
+  service_tier: null,
+  system_fingerprint: null,
+  usage: {
+    prompt_tokens: 134,
+    completion_tokens: 27,
+    total_tokens: 161,
+    cost: 0,
+    carbon: { kWh: [Object], kgCO2eq: [Object] },
+    details: [ [Object] ]
+  },
+  prompt_logprobs: null,
+  kv_transfer_params: null
+}
+[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/"}
+{
+  role: 'assistant',
+  content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/"}',
+  refusal: null,
+  annotations: null,
+  audio: null,
+  function_call: null,
+  tool_calls: [],
+  reasoning_content: null
+}
+[]
+[
+  '',
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}'
+]
+calls [ 'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}' ] 1
+call: get_folder{"full_url": "http://localhost:3000/david/holacratie/"}
+get_folder
+{ full_url: 'http://localhost:3000/david/holacratie/' }
+{
+  type: 'text',
+  text: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"},{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"}],"full_url":"http://localhost:3000/david/holacratie/"}'
+}
+
+[Calling tool get_folder with args {"full_url":"http://localhost:3000/david/holacratie/"}]
+Voici la liste des sous-dossiers disponibles dans le dossier 'holacratie' :
+
+1. **Acteurs** : http://localhost:3000/david/holacratie/acteurs/
+2. **Organisations** : http://localhost:3000/david/holacratie/organisations/
+3. **Partenaires** : http://localhost:3000/david/holacratie/partenaires/
+4. **Constitution** : http://localhost:3000/david/holacratie/constitution/
+
+Il semble qu'il y ait une duplication dans la liste, mais les sous-dossiers uniques sont ceux mentionnés ci-dessus.
+
+Query: creons un dossier machin dans partenaires
+{
+  id: 'chatcmpl-95f0e172c15f42c882542305a9c3c98e',
+  object: 'chat.completion',
+  created: 1758455768,
+  model: 'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
+  choices: [
+    {
+      index: 0,
+      message: [Object],
+      logprobs: null,
+      finish_reason: 'stop',
+      stop_reason: null
+    }
+  ],
+  service_tier: null,
+  system_fingerprint: null,
+  usage: {
+    prompt_tokens: 358,
+    completion_tokens: 30,
+    total_tokens: 388,
+    cost: 0,
+    carbon: { kWh: [Object], kgCO2eq: [Object] },
+    details: [ [Object] ]
+  },
+  prompt_logprobs: null,
+  kv_transfer_params: null
+}
+[TOOL_CALLS]create_folder{"path": "david/holacratie/partenaires", "slug": "machin"}
+{
+  role: 'assistant',
+  content: '[TOOL_CALLS]create_folder{"path": "david/holacratie/partenaires", "slug": "machin"}',
+  refusal: null,
+  annotations: null,
+  audio: null,
+  function_call: null,
+  tool_calls: [],
+  reasoning_content: null
+}
+[]
+[
+  '',
+  'create_folder{"path": "david/holacratie/partenaires", "slug": "machin"}'
+]
+calls [
+  'create_folder{"path": "david/holacratie/partenaires", "slug": "machin"}'
+] 1
+call: create_folder{"path": "david/holacratie/partenaires", "slug": "machin"}
+create_folder
+{ path: 'david/holacratie/partenaires', slug: 'machin' }
+{ type: 'text', text: '{}' }
+
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires","slug":"machin"}]
+Dossiers créés avec succès. Voici la liste mise à jour des dossiers et fichiers dans "http://localhost:3000/david/holacratie/partenaires/" :
+
+1. http://localhost:3000/david/holacratie/partenaires/machin/
+
 ```
