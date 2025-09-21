@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import { Session } from "@inrupt/solid-client-authn-node";
 import parseUrl from '../src/utils/urlParser.js';
 import { readFile } from 'fs/promises';
-const default_acl = "../src/acls/.acl"
+const default_acl = "../src/acls/.acl_default_solid_community"
 
 export class SolidOperations {
     constructor(options) {
