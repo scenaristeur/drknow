@@ -49,6 +49,9 @@ let options = {
                 name: "associes"
             },
             {
+                name: "acteurs"
+            },
+            {
                 name: "autorites"
             },
             {
@@ -104,6 +107,12 @@ let options = {
                     tensions: []
                 }
 
+                ],
+                acteurs: [
+                    { name: "lila", label: "Lila", roles: ["apprenti_explorateur", "decouvreuse"] },
+                    { name: "tartelru", label: "Tartuffe El Ruic", roles: ["artisan", "guide"], description: "Ancien explorateur aguerri, reconverti en artisan du cuir. Confectionne des outils pour les explorateurs." },
+                    { name: "er3an", label: "Er3an", roles: ["apprenti_explorateur"] },
+                    { name: "dady", label: "Da. dy Falavaleris" }
                 ]
             },
             { "name": "Village des Constructeurs de navires", folder: "navcovi", shortname: "ncv", description: "Village où le navires pour le monde Numerique sont construits. Se situe à proximité du Château des Robots." },
