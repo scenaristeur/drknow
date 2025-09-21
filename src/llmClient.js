@@ -20,69 +20,54 @@ export class LlmClient {
     }
 
     async processQuery(query) {
-        this.messages.push(
-            {
-                role: "user",
-                content: query,
-            })
+        try {
+            this.messages.push(
+                {
+                    role: "user",
+                    content: query,
+                })
 
-        const response = await this.client.chat.completions.create({
-            model: process.env['MODEL'],
-            // max_tokens: 1000,
-            messages: this.messages,
-            // tools: tools
-            tools: this.tools, // MCP ne fonctionne pas ???
-            // tool_choice: "auto"
-        });
+            const response = await this.client.chat.completions.create({
+                model: process.env['MODEL'],
+                // max_tokens: 1000,
+                messages: this.messages,
+                tools: this.tools,
+                // tool_choice: "auto"
+            });
 
-        console.log(response)
-        console.log(response.choices[0].message.content)
-        let msg = response.choices[0].message
-        console.log(msg)
-        console.log(msg.tool_calls)
+            // console.log(response.choices[0].message.content)
+            let msg = response.choices[0].message
+            console.log(msg)
+            console.log(msg.tool_calls)
+            console.log(msg.content)
 
-        const finalText = [];
-
-        let calls = msg.content.split("[TOOL_CALLS]")
-        console.log(calls)
-        if (calls.length == 1) {
+            const finalText = [];
             finalText.push(msg.content)
-        } else {
-            if (calls[0].length > 0) {
-                finalText.push(calls[0])
-            }
-            calls.shift()
-            // messages.append(msg.content)
+            let calls = this.extractToolCalls(msg.content)
 
-
-            //         # Si pas de tool_calls → réponse finale
-            //     if not msg.tool_calls:
-            //     print("Réponse finale :", msg.content)
-            //     break
-
-            // # Ajoute le message assistant avec les tool_calls
-            //     messages.append(msg)
-            console.log("calls", calls, calls.length)
             for (const call_tool of calls) {
                 // if (content.type === "text") {
                 //     finalText.push(content.text);
                 // } else if (content.type === "tool_use") {
                 console.log("call:", call_tool)
-                let c = call_tool.split("{")
-                const toolName = c[0] //content.name;
-                const toolArgs = JSON.parse('{' + c[1]) //content.input | undefined;
+                this.messages.push({
+                    role: "assistant",
+                    content: JSON.stringify(call_tool),
+                });
 
-                console.log(toolName)
-                console.log(toolArgs)
+                console.log("toolname", call_tool.toolName)
+                console.log("toolArgs", call_tool.toolArgs)
                 const result = await this.mcp.callTool({
-                    name: toolName,
-                    arguments: toolArgs,
+                    name: call_tool.toolName,
+                    arguments: call_tool.toolArgs,
                 });
                 finalText.push(
-                    `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`
+                    `[Calling tool ${call_tool.toolName} with args ${JSON.stringify(call_tool.toolArgs)}]`
                 );
 
                 console.log(result.content[0])
+
+
 
                 this.messages.push({
                     role: "user",
@@ -92,18 +77,58 @@ export class LlmClient {
 
                 // }
             }
+
+            // console.log("THIS MESSAAGES TO SEND : ", this.messages)
+
+            const response_after = await this.client.chat.completions.create({
+                model: process.env['MODEL'],
+                // max_tokens: 1000,
+                messages: this.messages,
+                tools: this.tools
+            });
+            let response_after_result = response_after.choices[0].message.content
+            console.log(response_after.choices[0])
+            finalText.push(
+                response_after_result
+            );
+            this.messages.push({
+                role: "assistant",
+                content: response_after_result,
+            });
+            // console.log("###MESSAGES/n", this.messages)
+            return finalText.join("\n");
         }
-        const response_after = await this.client.chat.completions.create({
-            model: process.env['MODEL'],
-            max_tokens: 1000,
-            messages: this.messages,
-            tools: this.tools
-        });
+        catch (e) {
+            console.log("!!!!!!!\nERREUR: ", e)
+        }
+    }
 
-        finalText.push(
-            response_after.choices[0].message.content
-        );
-
-        return finalText.join("\n");
+    extractToolCalls(text) {
+        const results = [];
+        const parts = text.split('[TOOL_CALLS]');
+        for (const part of parts) {
+            if (!part.trim()) continue;
+            const firstBrace = part.indexOf('{');
+            if (firstBrace === -1) continue;
+            const toolName = part.slice(0, firstBrace).trim();
+            // Trouver la fin du JSON avec comptage d'accolades
+            let braceCount = 0;
+            let end = firstBrace;
+            for (; end < part.length; end++) {
+                if (part[end] === '{') braceCount++;
+                if (part[end] === '}') braceCount--;
+                if (braceCount === 0) break;
+            }
+            const jsonString = part.slice(firstBrace, end + 1);
+            let toolArgs = null;
+            try {
+                toolArgs = JSON.parse(jsonString);
+            } catch (e) {
+                // Gérer l'erreur de parsing si besoin
+                continue;
+            }
+            results.push({ toolName, toolArgs });
+        }
+        return results;
     }
 }

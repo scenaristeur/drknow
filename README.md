@@ -97,7 +97,7 @@ https://forum.solidproject.org/t/my-first-app-adding-resources/275/9
 - https://www.youtube.com/watch?v=mhdGVbJBswA usage
 - client https://modelcontextprotocol.info/docs/tutorials/building-a-client-node/
 - https://medium.com/@__nagarajan__/building-and-accessing-local-mcp-server-using-open-ai-agent-with-node-js-5cbe626145eb
-
+- npm mcp fetcher https://github.com/zcaceres/fetch-mcp/blob/main/src%2FFetcher.ts
 
 
 # exemple serveur mcp avec Solid community server
@@ -554,4 +554,780 @@ Dossiers créés avec succès. Voici la liste mise à jour des dossiers et fichi
 
 1. http://localhost:3000/david/holacratie/partenaires/machin/
 
+```
+
+- suivi du contexte dans les messages 
+
+```
+node assistant.js mcp_server.js 
+[dotenv@17.2.2] injecting env (6) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+{
+  messages: [
+    {
+      role: 'system',
+      content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+        `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+        `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+        `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+        "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+        'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+    }
+  ]
+}
+Connected to server with tools: [ 'get_weather', 'get_folder', 'create_folder' ]
+
+MCP Client Started!
+Type your queries or 'quit' to exit.
+
+Query: dossiers ?
+[
+  '',
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}'
+]
+calls [ 'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}' ] 1
+call: get_folder{"full_url": "http://localhost:3000/david/holacratie/"}
+{
+  type: 'text',
+  text: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"},{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"}],"full_url":"http://localhost:3000/david/holacratie/"}'
+}
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Le dossier holacratie contient les sous-dossiers suivants :\n' +
+      '* constitution\n' +
+      '* acteurs\n' +
+      '* organisations\n' +
+      '* partenaires',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers ?' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"},{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"}],"full_url":"http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Le dossier holacratie contient les sous-dossiers suivants :\n' +
+      '* constitution\n' +
+      '* acteurs\n' +
+      '* organisations\n' +
+      '* partenaires'
+  }
+]
+
+[Calling tool get_folder with args {"full_url":"http://localhost:3000/david/holacratie/"}]
+Le dossier holacratie contient les sous-dossiers suivants :
+* constitution
+* acteurs
+* organisations
+* partenaires
+
+Query: creons un dossier hkoio dans partenaires
+[
+  '',
+  'create_folder{"path": "david/holacratie/partenaires", "slug": "hkoio"}'
+]
+calls [
+  'create_folder{"path": "david/holacratie/partenaires", "slug": "hkoio"}'
+] 1
+call: create_folder{"path": "david/holacratie/partenaires", "slug": "hkoio"}
+{ type: 'text', text: '{}' }
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Le dossier hkoio a été créé dans partenaires.',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers ?' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"},{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"}],"full_url":"http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Le dossier holacratie contient les sous-dossiers suivants :\n' +
+      '* constitution\n' +
+      '* acteurs\n' +
+      '* organisations\n' +
+      '* partenaires'
+  },
+  { role: 'user', content: 'creons un dossier hkoio dans partenaires' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires", "slug": "hkoio"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Le dossier hkoio a été créé dans partenaires.'
+  }
+]
+
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires","slug":"hkoio"}]
+Le dossier hkoio a été créé dans partenaires.
+
+Query: lister partenaires
+[
+  '',
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+]
+calls [
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+] 1
+call: get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}
+{
+  type: 'text',
+  text: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"}],"full_url":"http://localhost:3000/david/holacratie/partenaires/"}'
+}
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Le dossier partenaires contient les sous-dossiers suivants :\n' +
+      '* dfd\n' +
+      '* hkoio\n' +
+      '* machin\n' +
+      '* schbim\n' +
+      '* truc',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers ?' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"},{"@id":"http://localhost:3000/david/holacratie/"},{"@id":"http://localhost:3000/david/holacratie/acteurs/"},{"@id":"http://localhost:3000/david/holacratie/organisations/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/constitution/"}],"full_url":"http://localhost:3000/david/holacratie/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Le dossier holacratie contient les sous-dossiers suivants :\n' +
+      '* constitution\n' +
+      '* acteurs\n' +
+      '* organisations\n' +
+      '* partenaires'
+  },
+  { role: 'user', content: 'creons un dossier hkoio dans partenaires' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires", "slug": "hkoio"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Le dossier hkoio a été créé dans partenaires.'
+  },
+  { role: 'user', content: 'lister partenaires' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"}],"full_url":"http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Le dossier partenaires contient les sous-dossiers suivants :\n' +
+      '* dfd\n' +
+      '* hkoio\n' +
+      '* machin\n' +
+      '* schbim\n' +
+      '* truc'
+  }
+]
+
+[Calling tool get_folder with args {"full_url":"http://localhost:3000/david/holacratie/partenaires/"}]
+Le dossier partenaires contient les sous-dossiers suivants :
+* dfd
+* hkoio
+* machin
+* schbim
+* truc
+
+Query: 
+```
+
+- create 
+```node assistant.js mcp_server.js 
+[dotenv@17.2.2] injecting env (6) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+{
+  messages: [
+    {
+      role: 'system',
+      content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+        `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+        `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+        `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+        "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+        'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+    }
+  ]
+}
+Connected to server with tools: [ 'get_weather', 'get_folder', 'create_folder' ]
+
+MCP Client Started!
+Type your queries or 'quit' to exit.
+
+Query: dossiers dans partenaires/etude-001 
+[
+  '',
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+]
+calls [
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+] 1
+call: get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}
+{ type: 'text', text: '{}' }
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers dans partenaires/etude-001 ' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  }
+]
+
+[Calling tool get_folder with args {"full_url":"http://localhost:3000/david/holacratie/partenaires/etude-001"}]
+[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}
+
+Query: creons slim et fat dans etude-001
+[
+  '',
+  'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}',
+  'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}'
+]
+calls [
+  'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}',
+  'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}'
+] 2
+call: create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}
+{ type: 'text', text: '{}' }
+call: create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}
+{ type: 'text', text: '{}' }
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Les dossiers slim et fat ont été créés avec succès.',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers dans partenaires/etude-001 ' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: 'creons slim et fat dans etude-001' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Les dossiers slim et fat ont été créés avec succès.'
+  }
+]
+
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires/etude-001","slug":"slim"}]
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires/etude-001","slug":"fat"}]
+Les dossiers slim et fat ont été créés avec succès.
+
+Query: qui sont les autres partenaires ?
+[
+  '',
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+]
+calls [
+  'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+] 1
+call: get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}
+{
+  type: 'text',
+  text: '{"folder_content":[null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"},null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"}],"full_url":"http://localhost:3000/david/holacratie/partenaires/"}'
+}
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Voici la liste des partenaires:\n' +
+      '\n' +
+      '- etude-005\n' +
+      '- etude-015\n' +
+      '- etude-004\n' +
+      '- etude-014\n' +
+      '- truc\n' +
+      '- etude-017\n' +
+      '- etude-010\n' +
+      '- hkoio\n' +
+      '- etude-013\n' +
+      '- etude-012\n' +
+      '- etude-019\n' +
+      '- etude-011\n' +
+      '- etude-003\n' +
+      '- etude-008\n' +
+      '- etude-006\n' +
+      '- schbim\n' +
+      '- etude-007\n' +
+      '- dfsdf\n' +
+      '- etude-016\n' +
+      '- etude-009\n' +
+      '- etude-001\n' +
+      '- etude-020\n' +
+      '- machin\n' +
+      '- etude-018\n' +
+      '- etude-002',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers dans partenaires/etude-001 ' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: 'creons slim et fat dans etude-001' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Les dossiers slim et fat ont été créés avec succès.'
+  },
+  { role: 'user', content: 'qui sont les autres partenaires ?' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"},null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"}],"full_url":"http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Voici la liste des partenaires:\n' +
+      '\n' +
+      '- etude-005\n' +
+      '- etude-015\n' +
+      '- etude-004\n' +
+      '- etude-014\n' +
+      '- truc\n' +
+      '- etude-017\n' +
+      '- etude-010\n' +
+      '- hkoio\n' +
+      '- etude-013\n' +
+      '- etude-012\n' +
+      '- etude-019\n' +
+      '- etude-011\n' +
+      '- etude-003\n' +
+      '- etude-008\n' +
+      '- etude-006\n' +
+      '- schbim\n' +
+      '- etude-007\n' +
+      '- dfsdf\n' +
+      '- etude-016\n' +
+      '- etude-009\n' +
+      '- etude-001\n' +
+      '- etude-020\n' +
+      '- machin\n' +
+      '- etude-018\n' +
+      '- etude-002'
+  }
+]
+
+[Calling tool get_folder with args {"full_url":"http://localhost:3000/david/holacratie/partenaires/"}]
+Voici la liste des partenaires:
+
+- etude-005
+- etude-015
+- etude-004
+- etude-014
+- truc
+- etude-017
+- etude-010
+- hkoio
+- etude-013
+- etude-012
+- etude-019
+- etude-011
+- etude-003
+- etude-008
+- etude-006
+- schbim
+- etude-007
+- dfsdf
+- etude-016
+- etude-009
+- etude-001
+- etude-020
+- machin
+- etude-018
+- etude-002
+
+Query: cree ghou et gnou dans etude-016
+[
+  '',
+  'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "ghou"}',
+  'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "gnou"}'
+]
+calls [
+  'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "ghou"}',
+  'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "gnou"}'
+] 2
+call: create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "ghou"}
+{ type: 'text', text: '{}' }
+call: create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "gnou"}
+{ type: 'text', text: '{}' }
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Les dossiers gnou et ghou ont été créés avec succès dans le dossier etude-016.',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+###MESSAGES/n [
+  {
+    role: 'system',
+    content: 'Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.\n' +
+      `Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".\n` +
+      `le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil\n` +
+      `'get_folder' à l'adresse "http://localhost:3000/david/".\n` +
+      "On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).\n" +
+      'Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.\n'
+  },
+  { role: 'user', content: 'dossiers dans partenaires/etude-001 ' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: '[TOOL_CALLS]get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/etude-001"}'
+  },
+  { role: 'user', content: 'creons slim et fat dans etude-001' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "slim"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-001", "slug": "fat"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Les dossiers slim et fat ont été créés avec succès.'
+  },
+  { role: 'user', content: 'qui sont les autres partenaires ?' },
+  {
+    role: 'assistant',
+    content: 'get_folder{"full_url": "http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'user',
+    content: '{"folder_content":[null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"},null,{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-005/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-015/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-004/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-014/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/truc/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-017/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-010/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/hkoio/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-013/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-012/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-019/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-011/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-003/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-008/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-006/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/schbim/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-007/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/dfsdf/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-016/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-009/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-001/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-020/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/machin/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-018/"},{"@id":"http://localhost:3000/david/holacratie/partenaires/etude-002/"}],"full_url":"http://localhost:3000/david/holacratie/partenaires/"}'
+  },
+  {
+    role: 'assistant',
+    content: 'Voici la liste des partenaires:\n' +
+      '\n' +
+      '- etude-005\n' +
+      '- etude-015\n' +
+      '- etude-004\n' +
+      '- etude-014\n' +
+      '- truc\n' +
+      '- etude-017\n' +
+      '- etude-010\n' +
+      '- hkoio\n' +
+      '- etude-013\n' +
+      '- etude-012\n' +
+      '- etude-019\n' +
+      '- etude-011\n' +
+      '- etude-003\n' +
+      '- etude-008\n' +
+      '- etude-006\n' +
+      '- schbim\n' +
+      '- etude-007\n' +
+      '- dfsdf\n' +
+      '- etude-016\n' +
+      '- etude-009\n' +
+      '- etude-001\n' +
+      '- etude-020\n' +
+      '- machin\n' +
+      '- etude-018\n' +
+      '- etude-002'
+  },
+  { role: 'user', content: 'cree ghou et gnou dans etude-016' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "ghou"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'create_folder{"path": "david/holacratie/partenaires/etude-016", "slug": "gnou"}'
+  },
+  { role: 'user', content: '{}' },
+  {
+    role: 'assistant',
+    content: 'Les dossiers gnou et ghou ont été créés avec succès dans le dossier etude-016.'
+  }
+]
+
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires/etude-016","slug":"ghou"}]
+[Calling tool create_folder with args {"path":"david/holacratie/partenaires/etude-016","slug":"gnou"}]
+Les dossiers gnou et ghou ont été créés avec succès dans le dossier etude-016.
+
+Query: 
+```
+
+## utilisation du tool interacting_with_solid_server 
+
+```
+- dossiers
+- creons un nouveau partenaire jkuiiloieru.txt - avec le contenu "mlkhlihh ouigioug"
+change son contenu en "hello , salut"
+```
+
+- creation en json-ld
+```
+Query: cree un partenaire trevor dans le partenaire etude-014 avec en json-ld, avec le nom : trevor et adresse : Lyon
+{
+  role: 'assistant',
+  content: '[TOOL_CALLS]interacting_with_solid_server{"url": "http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json", "method": "PUT", "headers": {"content-type": "application/ld+json"}, "body": "{\\"@context\\": \\"http://schema.org\\", \\"name\\": \\"trevor\\", \\"address\\": {\\"addressLocality\\": \\"Lyon\\"}}"}',
+  refusal: null,
+  annotations: null,
+  audio: null,
+  function_call: null,
+  tool_calls: [],
+  reasoning_content: null
+}
+[]
+[TOOL_CALLS]interacting_with_solid_server{"url": "http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json", "method": "PUT", "headers": {"content-type": "application/ld+json"}, "body": "{\"@context\": \"http://schema.org\", \"name\": \"trevor\", \"address\": {\"addressLocality\": \"Lyon\"}}"}
+call: {
+  toolName: 'interacting_with_solid_server',
+  toolArgs: {
+    url: 'http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json',
+    method: 'PUT',
+    headers: { 'content-type': 'application/ld+json' },
+    body: '{"@context": "http://schema.org", "name": "trevor", "address": {"addressLocality": "Lyon"}}'
+  }
+}
+toolname interacting_with_solid_server
+toolArgs {
+  url: 'http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json',
+  method: 'PUT',
+  headers: { 'content-type': 'application/ld+json' },
+  body: '{"@context": "http://schema.org", "name": "trevor", "address": {"addressLocality": "Lyon"}}'
+}
+{
+  type: 'text',
+  text: '{"status":"ok","url":"http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json","options":{"method":"PUT","headers":{"content-type":"application/ld+json"},"body":"{\\"@context\\": \\"http://schema.org\\", \\"name\\": \\"trevor\\", \\"address\\": {\\"addressLocality\\": \\"Lyon\\"}}"}}'
+}
+{
+  index: 0,
+  message: {
+    role: 'assistant',
+    content: 'Le partenaire `trevor` a été créé dans le répertoire `etude-014` avec les informations suivantes en JSON-LD :\n' +
+      '```json\n' +
+      '{\n' +
+      '  "@context": "http://schema.org",\n' +
+      '  "name": "trevor",\n' +
+      '  "address": {\n' +
+      '    "addressLocality": "Lyon"\n' +
+      '  }\n' +
+      '}\n' +
+      '```\n' +
+      '\n' +
+      'Que souhaitez-vous faire ensuite ?',
+    refusal: null,
+    annotations: null,
+    audio: null,
+    function_call: null,
+    tool_calls: [],
+    reasoning_content: null
+  },
+  logprobs: null,
+  finish_reason: 'stop',
+  stop_reason: null
+}
+
+[TOOL_CALLS]interacting_with_solid_server{"url": "http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json", "method": "PUT", "headers": {"content-type": "application/ld+json"}, "body": "{\"@context\": \"http://schema.org\", \"name\": \"trevor\", \"address\": {\"addressLocality\": \"Lyon\"}}"}
+[Calling tool interacting_with_solid_server with args {"url":"http://localhost:3000/david/holacratie/partenaires/etude-014/trevor.json","method":"PUT","headers":{"content-type":"application/ld+json"},"body":"{\"@context\": \"http://schema.org\", \"name\": \"trevor\", \"address\": {\"addressLocality\": \"Lyon\"}}"}]
+Le partenaire `trevor` a été créé dans le répertoire `etude-014` avec les informations suivantes en JSON-LD :
+```json
+{
+  "@context": "http://schema.org",
+  "name": "trevor",
+  "address": {
+    "addressLocality": "Lyon"
+  }
+}
+```
 ```

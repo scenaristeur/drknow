@@ -51,6 +51,43 @@ server.registerTool("get_weather",
     })
 );
 
+
+server.registerTool("interacting_with_solid_server", {
+    title: "Interacting with Solid server",
+    description: `Outil CRUD générique pour lire, créer, supprimer, modifier des ressources sur un serveur Solid :
+    la méthode PUT: Creer des ressources à une url précise :
+    - exemple pour créer un fichier texte : {
+    "url": "http://localhost:3000/myfile.txt",
+    "method": 'PUT',
+    "headers": { "content-type": "text/plain" },
+    "body": "test de data 2"}`,
+    inputSchema: { url: z.string(), method: z.string(), headers: z.record(z.string(), z.string()), body: z.string() }
+},
+
+    async ({ url, method, headers, body }) => {
+
+        let options = {
+            method: method,
+            headers: headers,
+            body: body
+        }
+        console.log(options)
+        try {
+            let result = await session.fetch(url, options)
+            console.log(result)
+            // let content = [{ type: "text", text: String(JSON.stringify({ url: url })) }]
+            let content = [{ type: "text", text: String(JSON.stringify({ "status": "ok", "url": url, "options": options })) }]
+            return { content: content }
+        } catch (e) {
+            console.log(e, options)
+            let content = [{ type: "text", text: String(JSON.stringify({ "status": "ko", "result": e, "url": url, "options": options })) }]
+            return { content: content }
+        }
+    }
+
+)
+
+
 server.registerTool("get_folder",
     {
         title: "get_folder",
@@ -68,7 +105,11 @@ server.registerTool("get_folder",
             // console.log("post_result_json: ",post_result_json)
             let folder_list = await list_folder.json()
             console.log("ok list_folder: ", folder_list)
-            let short_folder_list = folder_list.map((f) => { return { "@id": f['@id'] } })
+            let short_folder_list = folder_list.map((f) => {
+                // if (f['@id'] != full_url) {
+                return { "@id": f['@id'] }
+                // }
+            })
             console.log(short_folder_list)
             let content = [{ type: "text", text: String(JSON.stringify({ folder_content: short_folder_list, full_url: full_url })) }]
             return { content: content }
