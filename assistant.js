@@ -1,193 +1,31 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import readline from "readline/promises";
-import OpenAI from 'openai';
-import dotenv from 'dotenv'
-
-dotenv.config({ path: './.env' })
 
 
-const messages = [{
-    role: "system",
-    content: "tu es en expert RDF, jsonld, turtle/n3. tu as accès des outils pour interagir avec des serveurs Solid"
-}]
+import { MCPClient } from "./src/mcpClient.js";
 
-class MCPClient {
-
-    constructor() {
-        this.client = new OpenAI({
-            apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-            baseURL: process.env['OPENAI_BASE_URL']
-        });
-        this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
-    }
-
-    async connectToServer(serverScriptPath) {
-        try {
-            const isJs = serverScriptPath.endsWith(".js");
-            const isPy = serverScriptPath.endsWith(".py");
-            if (!isJs && !isPy) {
-                throw new Error("Server script must be a .js or .py file");
-            }
-            const command = isPy
-                ? process.platform === "win32"
-                    ? "python"
-                    : "python3"
-                : process.execPath;
-
-            this.transport = new StdioClientTransport({
-                command,
-                args: [serverScriptPath],
-            });
-            await this.mcp.connect(this.transport);
-
-            const toolsResult = await this.mcp.listTools();
-            this.tools = toolsResult.tools.map((tool) => {
-                return {
-                    "type": "function",
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.inputSchema
-                    }
-                }
-            });
-            console.log(
-                "Connected to server with tools:",
-                this.tools.map((tool) => tool.function.name)
-            );
-            // console.log(JSON.stringify(this.tools, null, 2))
-        } catch (e) {
-            console.log("Failed to connect to MCP server: ", e);
-            throw e;
-        }
-    }
-
-    async chatLoop() {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-
-        try {
-            console.log("\nMCP Client Started!");
-            console.log("Type your queries or 'quit' to exit.");
-
-            while (true) {
-                const message = await rl.question("\nQuery: ");
-                if (message.toLowerCase() === "quit") {
-                    break;
-                }
-                const response = await this.processQuery(message);
-                console.log("\n" + response);
-            }
-        } finally {
-            rl.close();
-        }
-    }
-
-    async processQuery(query) {
-        messages.push(
-            {
-                role: "user",
-                content: query,
-            })
-
-        const response = await this.client.chat.completions.create({
-            model: process.env['MODEL'],
-            // max_tokens: 1000,
-            messages,
-            // tools: tools
-            tools: this.tools, // MCP ne fonctionne pas ???
-            // tool_choice: "auto"
-        });
-
-        console.log(response)
-        console.log(response.choices[0].message.content)
-        let msg = response.choices[0].message
-        console.log(msg)
-        console.log(msg.tool_calls)
-
-        const finalText = [];
-
-        let calls = msg.content.split("[TOOL_CALLS]")
-        console.log(calls)
-        if (calls.length == 1) {
-            finalText.push(msg.content)
-        } else {
-            if (calls[0].length > 0) {
-                finalText.push(calls[0])
-            }
-            calls.shift()
-            // messages.append(msg.content)
+const systemPrompt = `Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.
+Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".
+le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil
+'get_folder' à l'adresse "http://localhost:3000/david/".
+On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).
+Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.
+`
 
 
-            //         # Si pas de tool_calls → réponse finale
-            //     if not msg.tool_calls:
-            //     print("Réponse finale :", msg.content)
-            //     break
-
-            // # Ajoute le message assistant avec les tool_calls
-            //     messages.append(msg)
-            console.log("calls", calls, calls.length)
-            for (const call_tool of calls) {
-                // if (content.type === "text") {
-                //     finalText.push(content.text);
-                // } else if (content.type === "tool_use") {
-                console.log("call:", call_tool)
-                let c = call_tool.split("{")
-                const toolName = c[0] //content.name;
-                const toolArgs = JSON.parse('{' + c[1]) //content.input | undefined;
-
-                console.log(toolName)
-                console.log(toolArgs)
-                const result = await this.mcp.callTool({
-                    name: toolName,
-                    arguments: toolArgs,
-                });
-                finalText.push(
-                    `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`
-                );
-
-                console.log(result.content[0])
-
-                messages.push({
-                    role: "user",
-                    content: result.content[0].text,
-                });
-
-
-                // }
-            }
-        }
-        const response_after = await this.client.chat.completions.create({
-            model: process.env['MODEL'],
-            max_tokens: 1000,
-            messages,
-        });
-
-        finalText.push(
-            response_after.choices[0].message.content
-        );
-
-        return finalText.join("\n");
-    }
-
-
-    async cleanup() {
-        await this.mcp.close();
-    }
-
+const options = {
+    messages: [{
+        role: "system",
+        content: systemPrompt
+    }]
 }
 
-
+// const mcpClient = new MCPClient()
 
 async function main() {
     if (process.argv.length < 3) {
         console.log("Usage: node index.ts <path_to_server_script>");
         return;
     }
-    const mcpClient = new MCPClient();
+    const mcpClient = new MCPClient(options);
     try {
         await mcpClient.connectToServer(process.argv[2]);
         await mcpClient.chatLoop();

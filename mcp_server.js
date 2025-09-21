@@ -54,22 +54,28 @@ server.registerTool("get_weather",
 server.registerTool("get_folder",
     {
         title: "get_folder",
-        description: "Lister les resources disponibles sur un serveur Solid",
-        inputSchema: { path: z.string() }
+        description: "Lister le contenu d'un dossier en fournissant son url complete",
+        inputSchema: { full_url: z.string() }
     },
-    async ({ path }) => {
-        let url = "http://localhost:3000/" + path + '/'
-        let list_folder = await session.fetch(url, {
-            method: 'GET',
-            headers: { 'accept': 'application/json' }
+    async ({ full_url }) => {
+        // let url = "http://localhost:3000/" + path
+        try {
+            let list_folder = await session.fetch(full_url, {
+                method: 'GET',
+                headers: { 'accept': 'application/json' }
+            }
+            )
+            // console.log("post_result_json: ",post_result_json)
+            let folder_list = await list_folder.json()
+            console.log("ok list_folder: ", folder_list)
+            let short_folder_list = folder_list.map((f) => { return { "@id": f['@id'] } })
+            console.log(short_folder_list)
+            let content = [{ type: "text", text: String(JSON.stringify({ folder_content: short_folder_list, full_url: full_url })) }]
+            return { content: content }
         }
-        )
-        // console.log("post_result_json: ",post_result_json)
-        let folder_list = await list_folder.json()
-        console.log("ok list_folder: ", folder_list)
-
-        let content = [{ type: "text", text: String(JSON.stringify({ folder_list: folder_list, url: url })) }]
-        return { content: content }
+        catch (e) {
+            return { content: e }
+        }
     }
 );
 
