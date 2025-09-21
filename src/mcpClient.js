@@ -66,15 +66,22 @@ export class MCPClient {
         try {
             console.log("\nMCP Client Started!");
             console.log("Type your queries or 'quit' to exit.");
+            console.log("Tu peux commencer par taper 'dossiers' pour lister les dossiers.");
+            console.log("Pour consulter les messages, tape 'messages'");
 
             while (true) {
                 const message = await rl.question("\nQuery: ");
                 if (message.toLowerCase() === "quit") {
                     break;
                 }
-                // const response = await this.processQuery(message);
-                const response = await this.llm_client.processQuery(message)
-                console.log("\n" + response);
+                if (message.toLocaleLowerCase() === 'messages') {
+                    this.llm_client.log_messages()
+                } else {
+                    // const response = await this.processQuery(message);
+                    const response = await this.llm_client.processQuery(message)
+                    console.log("\n" + response);
+                }
+
             }
         } finally {
             rl.close();

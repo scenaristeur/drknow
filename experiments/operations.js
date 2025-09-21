@@ -125,7 +125,8 @@ let options = {
 
 
 }
-await testHolacratie(options)
+//await testHolacratie(options)
+test1()
 
 async function testHolacratie(options) {
     console.log(options)

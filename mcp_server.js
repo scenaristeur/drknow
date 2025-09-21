@@ -55,12 +55,73 @@ server.registerTool("get_weather",
 server.registerTool("interacting_with_solid_server", {
     title: "Interacting with Solid server",
     description: `Outil CRUD générique pour lire, créer, supprimer, modifier des ressources sur un serveur Solid :
-    la méthode PUT: Creer des ressources à une url précise :
-    - exemple pour créer un fichier texte : {
-    "url": "http://localhost:3000/myfile.txt",
-    "method": 'PUT',
-    "headers": { "content-type": "text/plain" },
-    "body": "test de data 2"}`,
+    la méthode PUT permet de creer des ressources à une url précise :
+        - PUT pour créer un fichier texte : {
+            {"url": "http://localhost:3000/myfile.txt",
+            "method": 'PUT',
+            "headers": { "content-type": "text/plain" },
+            "body": "test de data 2"}
+        - PUT pour créer un fichier turtle :
+            {"url": "http://localhost:3000/myfile.ttl",
+            "method": 'PUT',
+            "headers": { "content-type": "text/turtle" },
+            "body": "<ex:s> <ex:p> <ex:o>.\n<ex:s> <ex:p2> <ex:o2>."}
+    la méthode POST permet de créer des ressources dans un dossier, son url est générée par le serveur et retourné dans la variable location
+        - POST :
+            {"url": "http://localhost:3000/myfolder/",
+            "method": 'POST',
+            "headers": { "content-type": "text/turtle" },
+            "body": "<ex:s> <ex:p> <ex:o>."}
+    la méthode GET pour lire les ressources : 
+        - GET pour lire un fichier texte:
+            {"url": "http://localhost:3000/myfile.txt",
+            "method": 'GET',
+            "headers": { "accept": "text/plain" }}
+        - GET pour lire un fichier turtle:
+            {"url": "http://localhost:3000/myfile.ttl",
+            "method": 'GET',
+            "headers": { "accept": "text/turtle" }}
+        - GET pour obtenir un fichier dans une autre serialisation:
+            {"url": "http://localhost:3000/myfile.ttl",
+            "method": 'GET',
+            "headers": { "accept": "application/ld+json" }}
+        - GET pour lire le contenu d'un dossier :
+            {"url": "http://localhost:3000/mon_dossier/",
+            "method": 'GET',
+            "headers": { "accept": "application/json" }}
+    la methode DELETE pour supprimer une ressource
+        - DELETE:
+            {"url": "http://localhost:3000/mon_dossier/le_fichier.txt",
+            "method": 'DELETE'}
+les methodes PATCH, HEAD, OPTIONS sont également disponibles
+PATCH: Modifying resources¶
+
+Modify a resource using N3 Patch:
+
+curl -X PATCH -H "Content-Type: text/n3" \
+  --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }." \
+  http://localhost:3000/myfile.ttl
+
+Modify a resource using SPARQL Update:
+
+curl -X PATCH -H "Content-Type: application/sparql-update" \
+  -d "INSERT DATA { <ex:s2> <ex:p2> <ex:o2> }" \
+  http://localhost:3000/myfile.ttl
+
+HEAD: Retrieve resources headers¶
+
+curl -I -H "Accept: text/plain" \
+  http://localhost:3000/myfile.txt
+
+OPTIONS: Retrieve resources communication options¶
+
+curl -X OPTIONS -i http://localhost:3000/myfile.txt
+
+
+
+- les dossiers aussi appelés folders ou containers se terminent TOUJOURS par '/'
+- Les clés ("accept", "content-type"...) des headers doivent être en miniscule.
+    - Pour déplacer un fichier, il faut d'abord créer la copie avec PUT, puis supprimer l'ancien avec DELETE.`,
     inputSchema: { url: z.string(), method: z.string(), headers: z.record(z.string(), z.string()), body: z.string() }
 },
 
@@ -69,14 +130,41 @@ server.registerTool("interacting_with_solid_server", {
         let options = {
             method: method,
             headers: headers,
-            body: body
+        }
+        if (body != undefined && body.length > 0) {
+            options.body = body
         }
         console.log(options)
         try {
             let result = await session.fetch(url, options)
-            console.log(result)
+            // console.log(result)
+            let message = { "status": result.status, "statusText": result.statusText, "ok": result.ok, "url": url, "options": options }
+            if (result.headers.get("location") != undefined) {
+                message.location = result.headers.get("location")
+            }
+
+            if (headers.accept == 'application/json' ||
+                headers.accept == 'application/ld+json' ||
+                headers.Accept == 'application/json' ||
+                headers.Accept == 'application/ld+json') {
+                let body_json = await result.json()
+                if (method == "GET" && url.endsWith('/')) {
+                    // alléger la réponse liste  contenu d'un dossier 
+                    let short_body_json = body_json.map((f) => {
+                        if (f['@id'] != url) {
+                            return { "@id": f['@id'] }
+                        }
+                    })
+                    message.body = short_body_json
+                } else {
+                    message.body = body_json
+                }
+
+            } else {
+                message.body = await result.text()
+            }
             // let content = [{ type: "text", text: String(JSON.stringify({ url: url })) }]
-            let content = [{ type: "text", text: String(JSON.stringify({ "status": "ok", "url": url, "options": options })) }]
+            let content = [{ type: "text", text: String(JSON.stringify(message)) }]
             return { content: content }
         } catch (e) {
             console.log(e, options)
@@ -88,38 +176,38 @@ server.registerTool("interacting_with_solid_server", {
 )
 
 
-server.registerTool("get_folder",
-    {
-        title: "get_folder",
-        description: "Lister le contenu d'un dossier en fournissant son url complete",
-        inputSchema: { full_url: z.string() }
-    },
-    async ({ full_url }) => {
-        // let url = "http://localhost:3000/" + path
-        try {
-            let list_folder = await session.fetch(full_url, {
-                method: 'GET',
-                headers: { 'accept': 'application/json' }
-            }
-            )
-            // console.log("post_result_json: ",post_result_json)
-            let folder_list = await list_folder.json()
-            console.log("ok list_folder: ", folder_list)
-            let short_folder_list = folder_list.map((f) => {
-                // if (f['@id'] != full_url) {
-                return { "@id": f['@id'] }
-                // }
-            })
-            console.log(short_folder_list)
-            let content = [{ type: "text", text: String(JSON.stringify({ folder_content: short_folder_list, full_url: full_url })) }]
-            return { content: content }
-        }
-        catch (e) {
-            let content = [{ type: "text", text: String(JSON.stringify(e)) }]
-            return { content: content }
-        }
-    }
-);
+// server.registerTool("get_folder",
+//     {
+//         title: "get_folder",
+//         description: "Lister le contenu d'un dossier en fournissant son url complete",
+//         inputSchema: { full_url: z.string() }
+//     },
+//     async ({ full_url }) => {
+//         // let url = "http://localhost:3000/" + path
+//         try {
+//             let list_folder = await session.fetch(full_url, {
+//                 method: 'GET',
+//                 headers: { 'accept': 'application/json' }
+//             }
+//             )
+//             // console.log("post_result_json: ",post_result_json)
+//             let folder_list = await list_folder.json()
+//             console.log("ok list_folder: ", folder_list)
+//             let short_folder_list = folder_list.map((f) => {
+//                 // if (f['@id'] != full_url) {
+//                 return { "@id": f['@id'] }
+//                 // }
+//             })
+//             console.log(short_folder_list)
+//             let content = [{ type: "text", text: String(JSON.stringify({ folder_content: short_folder_list, full_url: full_url })) }]
+//             return { content: content }
+//         }
+//         catch (e) {
+//             let content = [{ type: "text", text: String(JSON.stringify(e)) }]
+//             return { content: content }
+//         }
+//     }
+// );
 
 server.registerTool("create_folder",
     {

@@ -8,6 +8,9 @@ le dossier de l'utilisateur courant est "david", son dossier est accessible avec
 'get_folder' à l'adresse "http://localhost:3000/david/".
 On travaille toujours dans le dossier 'holacratie' (http://localhost:3000/david/holacratie/).
 Commence par lister ce dossier pour connaître les sous-dossiers disponibles et les projets en cours.
+Ne donne JAMAIS de fausses informations. Base-toi seulement sur les informations que tu peux recupérer.
+N'invente pas. sauf lorsque l'on tedemande d'être créatif.
+Si tu n'as aucune information ou si tu ne parviens pas à les récupérer, dis-le, en donnant le message d'erreur si tu en as un.
 `
 
 

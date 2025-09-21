@@ -37,9 +37,9 @@ export class LlmClient {
 
             // console.log(response.choices[0].message.content)
             let msg = response.choices[0].message
-            console.log(msg)
-            console.log(msg.tool_calls)
-            console.log(msg.content)
+            // console.log(msg)
+            // console.log(msg.tool_calls)
+            // console.log(msg.content)
 
             const finalText = [];
             finalText.push(msg.content)
@@ -49,30 +49,40 @@ export class LlmClient {
                 // if (content.type === "text") {
                 //     finalText.push(content.text);
                 // } else if (content.type === "tool_use") {
-                console.log("call:", call_tool)
+                // console.log("call:", call_tool)
                 this.messages.push({
                     role: "assistant",
                     content: JSON.stringify(call_tool),
                 });
+                let tool_names = this.tools.map((tool) => tool.function.name)
+                // console.log("toolArgs", call_tool.toolArgs)
+                if (tool_names.includes(call_tool.toolName)) {
+                    // console.log("toolname", call_tool.toolName)
+                    // console.log("toolArgs", call_tool.toolArgs)
+                    const result = await this.mcp.callTool({
+                        name: call_tool.toolName,
+                        arguments: call_tool.toolArgs,
+                    });
+                    console.log("RESULT:", result)
+                    finalText.push(
+                        `[Calling tool ${call_tool.toolName} with args ${JSON.stringify(call_tool.toolArgs)}]`
+                    );
+                    this.messages.push({
+                        role: "user",
+                        content: result.content[0].text,
+                    });
+                } else {
+                    console.log(" !!Pas de tool nommé ", call_tool.toolName)
+                    this.messages.push({
+                        role: "user",
+                        content: "!!Pas de tool nommé " + call_tool.toolName,
+                    });
+                }
+                // console.log(result.content[0])
 
-                console.log("toolname", call_tool.toolName)
-                console.log("toolArgs", call_tool.toolArgs)
-                const result = await this.mcp.callTool({
-                    name: call_tool.toolName,
-                    arguments: call_tool.toolArgs,
-                });
-                finalText.push(
-                    `[Calling tool ${call_tool.toolName} with args ${JSON.stringify(call_tool.toolArgs)}]`
-                );
-
-                console.log(result.content[0])
 
 
 
-                this.messages.push({
-                    role: "user",
-                    content: result.content[0].text,
-                });
 
 
                 // }
@@ -84,10 +94,10 @@ export class LlmClient {
                 model: process.env['MODEL'],
                 // max_tokens: 1000,
                 messages: this.messages,
-                tools: this.tools
+                // tools: this.tools
             });
             let response_after_result = response_after.choices[0].message.content
-            console.log(response_after.choices[0])
+            // console.log(response_after.choices[0])
             finalText.push(
                 response_after_result
             );
@@ -103,6 +113,9 @@ export class LlmClient {
         }
     }
 
+    log_messages() {
+        console.log(this.messages)
+    }
     extractToolCalls(text) {
         const results = [];
         const parts = text.split('[TOOL_CALLS]');
