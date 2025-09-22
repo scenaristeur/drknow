@@ -1,6 +1,12 @@
+# solid session "@inrupt/solid-client-authn-node"
 TOKEN_IDENTIFIER=my_token_xxx
 TOKEN_SECRET=xxx
 OPENID_PROVIDER=http://localhost:3000
+
+# or solid client-credentials not implemented yet. see test_css_client_credentials
+EMAIL=xxx@xx.xx
+PASSWORD=xxxx
+
 OPENAI_API_KEY=sk-xxx
 OPENAI_BASE_URL="https://provider.domain/v1"
 MODEL="model"

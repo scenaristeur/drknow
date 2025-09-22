@@ -3,10 +3,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 
+// to test the session
 import { SolidOperations } from './src/solidOperations.js';
-
 let sop = new SolidOperations()
-
 await sop.init()
 
 
@@ -43,6 +42,13 @@ server.registerTool("interacting_with_solid_server", {
             "method": 'PUT',
             "headers": { "content-type": "text/turtle" },
             "body": "<ex:s> <ex:p> <ex:o>.\n<ex:s> <ex:p2> <ex:o2>."}
+        - PUT pour créer un dossier
+            {"url": "http://localhost:3000/" + path + '/' + slug + '/',
+            headers: {
+                'Content-Type': 'text/turtle',
+                'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+                'Slug': slug
+            };
     la méthode POST permet de créer des ressources dans un dossier, son url est générée par le serveur et retourné dans la variable location
         - POST :
             {"url": "http://localhost:3000/myfolder/",
@@ -79,8 +85,8 @@ curl -X PATCH -H "Content-Type: application/sparql-update" \
   -d "INSERT DATA { <ex:s2> <ex:p2> <ex:o2> }" \
   http://localhost:3000/myfile.ttl
   ou une modification plus complexe
-# debut modif
-  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# debut modif qu'il faut envoyer dans le body :
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 @prefix ex: <http://example.org/>
 
 DELETE {?s ?p ?o}
@@ -93,7 +99,7 @@ WHERE  { ?s ?p ?o .
 }
 #fin modif
 
-Modify a resource using N3 Patch:
+Modify a resource using N3 Patch(ne pas oublier le prefix 'solid:':
 
 curl -X PATCH -H "Content-Type: text/n3" \
   --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }." \
@@ -113,14 +119,42 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
     - Pour déplacer un fichier, il faut d'abord créer la copie avec PUT, puis supprimer l'ancien avec DELETE.`,
     inputSchema: { url: z.string(), method: z.string().optional(), headers: z.record(z.string(), z.string()).optional(), body: z.string().optional() }
 },
-
     async ({ url, method, headers, body }) => {
         return sop.fetch({ url, method, headers, body })
-
     }
-
 )
 
+
+// server.registerTool("create_folder",
+//     {
+//         title: "Create Folder",
+//         description: "Creer un nouveau dossier {slug} dans le dossier {path} sur un serveur Solid, dans http://localhost:3000/{path}/{slug}/",
+//         inputSchema: { path: z.string(), slug: z.string() }
+//     },
+//     async ({ path, slug }) => {
+//         try {
+//             let full_url = "http://localhost:3000/" + path + '/' + slug + '/'
+//             let headers = {
+//                 'Content-Type': 'text/turtle',
+//                 'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+//                 'Slug': slug
+//             };
+//             // let result = await fetchOperation(session, 'PUT', url, null, headers);
+//             let folder_create = await session.fetch(full_url, {
+//                 method: 'PUT',
+//                 headers: headers
+//             })
+//             console.log("ok post_folder: ", result);
+//             // return { content: [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }] };
+//             let content = [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }]
+//             console.log("THE CONTENT:", content)
+//             return { content: content }
+//         } catch (e) {
+//             let content = [{ type: "text", text: String(JSON.stringify(e)) }]
+//             return { content: content }
+//         }
+//     }
+// );
 
 // server.registerTool("get_folder",
 //     {
@@ -154,37 +188,6 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
 //         }
 //     }
 // );
-
-server.registerTool("create_folder",
-    {
-        title: "Create Folder",
-        description: "Creer un nouveau dossier {slug} dans le dossier {path} sur un serveur Solid, dans http://localhost:3000/{path}/{slug}/",
-        inputSchema: { path: z.string(), slug: z.string() }
-    },
-    async ({ path, slug }) => {
-        try {
-            let full_url = "http://localhost:3000/" + path + '/' + slug + '/'
-            let headers = {
-                'Content-Type': 'text/turtle',
-                'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
-                'Slug': slug
-            };
-            // let result = await fetchOperation(session, 'PUT', url, null, headers);
-            let folder_create = await session.fetch(full_url, {
-                method: 'PUT',
-                headers: headers
-            })
-            console.log("ok post_folder: ", result);
-            // return { content: [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }] };
-            let content = [{ type: "text", text: String(JSON.stringify({ result: folder_create, full_url: full_url })) }]
-            console.log("THE CONTENT:", content)
-            return { content: content }
-        } catch (e) {
-            let content = [{ type: "text", text: String(JSON.stringify(e)) }]
-            return { content: content }
-        }
-    }
-);
 
 // Start receiving messages on stdin and sending messages on stdout
 const transport = new StdioServerTransport();

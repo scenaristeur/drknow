@@ -2,6 +2,13 @@
 
 import { MCPClient } from "./src/mcpClient.js";
 
+import { SolidOperations } from './src/solidOperations.js';
+
+let sop = new SolidOperations()
+
+await sop.init()
+
+
 const systemPrompt = `Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.
 Tu as accès des outils pour interagir avec un serveur Solid à l'url "http://localhost:3000/".
 le dossier de l'utilisateur courant est "david", son dossier est accessible avec l'outil

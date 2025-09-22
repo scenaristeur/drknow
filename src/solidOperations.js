@@ -1,4 +1,4 @@
-import { Session } from "@inrupt/solid-client-authn-node";
+import { Session, EVENTS } from "@inrupt/solid-client-authn-node";
 import dotenv from 'dotenv'
 
 import parseUrl from './utils/urlParser.js';
@@ -13,7 +13,7 @@ export class SolidOperations {
     }
     async init() {
         try {
-            // session timeout expiration 5 min https://forum.solidproject.org/t/ess-timeout-after-5-minutes/6444/5
+            //session timeout expiration 5 min https://forum.solidproject.org/t/ess-timeout-after-5-minutes/6444/5
             session.events.on(EVENTS.SESSION_EXPIRATION, () => {
                 session.login({
                     oidcIssuer: process.env.OPENID_PROVIDER,
@@ -28,7 +28,7 @@ export class SolidOperations {
             });
 
             console.log(`You are now logged in as ${session.info.webId}`);
-            // console.log(session)
+            console.log(session.info)
             let webId = session.info.webId
 
             // let res = await session.fetch("http://localhost:3000/david/profile/")
