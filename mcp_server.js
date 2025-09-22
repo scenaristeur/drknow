@@ -122,10 +122,10 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
 - les dossiers aussi appelés folders ou containers se terminent TOUJOURS par '/'
 - Les clés ("accept", "content-type"...) des headers doivent être en miniscule.
     - Pour déplacer un fichier, il faut d'abord créer la copie avec PUT, puis supprimer l'ancien avec DELETE.`,
-    inputSchema: { url: z.string(), method: z.string(), headers: z.record(z.string(), z.string()), body: z.string() }
+    inputSchema: { url: z.string(), method: z.string().optional(), headers: z.record(z.string(), z.string()).optional(), body: z.string().optional() }
 },
 
-    async ({ url, method, headers, body }) => {
+    async ({ url, method = "GET", headers, body }) => {
 
         let options = {
             method: method,
@@ -138,7 +138,14 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
         try {
             let result = await session.fetch(url, options)
             // console.log(result)
-            let message = { "status": result.status, "statusText": result.statusText, "ok": result.ok, "url": url, "options": options }
+            let message = {
+                "status": result.status,
+                "statusText": result.statusText,
+                "ok": result.ok,
+                "url": url,
+                "options": options,
+                "session": session.info
+            }
             if (result.headers.get("location") != undefined) {
                 message.location = result.headers.get("location")
             }
@@ -155,7 +162,7 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
                             return { "@id": f['@id'] }
                         }
                     })
-                    message.body = short_body_json
+                    message.body = [...new Set(short_body_json.filter(n => n))]; //remove null & unique
                 } else {
                     message.body = body_json
                 }
@@ -168,7 +175,14 @@ curl -X OPTIONS -i http://localhost:3000/myfile.txt
             return { content: content }
         } catch (e) {
             console.log(e, options)
-            let content = [{ type: "text", text: String(JSON.stringify({ "status": "ko", "result": e, "url": url, "options": options })) }]
+            let content = [{
+                type: "text", text: String(JSON.stringify({
+                    "status": "ko",
+                    "result": e, "url": url,
+                    "options": options,
+                    "session": session.info
+                }))
+            }]
             return { content: content }
         }
     }

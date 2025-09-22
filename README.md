@@ -1828,3 +1828,5 @@ L'âge de Bob a été mis à jour avec succès. Il a maintenant 25 ans. Vous pou
 
 Query: 
 ```
+
+solid	http://www.w3.org/ns/solid/terms#

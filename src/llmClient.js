@@ -35,25 +35,32 @@ export class LlmClient {
                 // tool_choice: "auto"
             });
 
+
             // console.log(response.choices[0].message.content)
             let msg = response.choices[0].message
             // console.log(msg)
             // console.log(msg.tool_calls)
             // console.log(msg.content)
+            this.messages.push({
+                role: "assistant",
+                content: msg.content,
+            });
 
             const finalText = [];
             finalText.push(msg.content)
-            let calls = this.extractToolCalls(msg.content)
 
+            console.log("\nCONTENT", msg.content)
+            let calls = this.extractToolCalls(msg.content)
+            console.log("\nCALLS", calls)
             for (const call_tool of calls) {
                 // if (content.type === "text") {
                 //     finalText.push(content.text);
                 // } else if (content.type === "tool_use") {
                 // console.log("call:", call_tool)
-                this.messages.push({
-                    role: "assistant",
-                    content: JSON.stringify(call_tool),
-                });
+                // this.messages.push({
+                //     role: "assistant",
+                //     content: JSON.stringify(call_tool),
+                // });
                 let tool_names = this.tools.map((tool) => tool.function.name)
                 // console.log("toolArgs", call_tool.toolArgs)
                 if (tool_names.includes(call_tool.toolName)) {
@@ -72,10 +79,10 @@ export class LlmClient {
                         content: result.content[0].text,
                     });
                 } else {
-                    console.log(" !!Pas de tool nommé ", call_tool.toolName)
+                    console.log(" !!Pas de tool nommé __", call_tool.toolName) + "__"
                     this.messages.push({
                         role: "user",
-                        content: "!!Pas de tool nommé " + call_tool.toolName,
+                        content: "!!Pas de tool nommé __" + call_tool.toolName + "__",
                     });
                 }
                 // console.log(result.content[0])
@@ -116,9 +123,11 @@ export class LlmClient {
     log_messages() {
         console.log(this.messages)
     }
-    extractToolCalls(text) {
+    extractToolCalls(toolcalls) {
         const results = [];
-        const parts = text.split('[TOOL_CALLS]');
+        console.log("typeof", typeof toolcalls)
+        console.log("toolcalls.toolname", toolcalls.toolName)
+        const parts = toolcalls.split('[TOOL_CALLS]');
         for (const part of parts) {
             if (!part.trim()) continue;
             const firstBrace = part.indexOf('{');
