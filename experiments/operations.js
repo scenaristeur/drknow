@@ -1,4 +1,4 @@
-import { SolidOperations } from "../src/solidOperations.js"
+import { SolidOperations } from "../src/solidOperations.js1"
 
 let envFile = '../.env'
 let op = new SolidOperations({ envFile })

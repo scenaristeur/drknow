@@ -9,9 +9,9 @@ import { LlmClient } from "./llmClient.js";
 export class MCPClient {
 
     constructor(options) {
-        console.log(options)
+        this.session = options.session
+        this.pod = options.pod
         this.messages = options.messages
-
         this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
     }
 

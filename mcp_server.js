@@ -2,35 +2,12 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-import { Session } from "@inrupt/solid-client-authn-node";
-import dotenv from 'dotenv'
 
-import parseUrl from './src/utils/urlParser.js';
-import { fetchOperation } from './src/utils/fetchOperations.js';
+import { SolidOperations } from './src/solidOperations.js';
 
+let sop = new SolidOperations()
 
-dotenv.config({ path: '.env' })
-const session = new Session();
-try {
-
-    await session.login({
-        oidcIssuer: process.env.OPENID_PROVIDER,
-        clientId: process.env.TOKEN_IDENTIFIER,
-        clientSecret: process.env.TOKEN_SECRET,
-    });
-
-    console.log(`You are now logged in as ${session.info.webId}`);
-    // console.log(session)
-    let webId = session.info.webId
-
-    // let res = await session.fetch("http://localhost:3000/david/profile/")
-    // console.log(await res.text())
-    let pod = parseUrl(webId)
-    console.log(pod)
-
-} catch (e) {
-    console.log("serveur Solid non disponible")
-}
+await sop.init()
 
 
 // Create an MCP server
@@ -96,19 +73,33 @@ server.registerTool("interacting_with_solid_server", {
 les methodes PATCH, HEAD, OPTIONS sont également disponibles
 PATCH: Modifying resources¶
 
+Modify a resource using SPARQL Update:
+
+curl -X PATCH -H "Content-Type: application/sparql-update" \
+  -d "INSERT DATA { <ex:s2> <ex:p2> <ex:o2> }" \
+  http://localhost:3000/myfile.ttl
+  ou une modification plus complexe
+# debut modif
+  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+@prefix ex: <http://example.org/>
+
+DELETE {?s ?p ?o}
+INSERT {?s ex:title "foo" ;
+           ex:description "bar" ;
+           rdf:type ex:FooBar .
+       }
+WHERE  { ?s ?p ?o .
+         FILTER (?s = ex:subject1)
+}
+#fin modif
+
 Modify a resource using N3 Patch:
 
 curl -X PATCH -H "Content-Type: text/n3" \
   --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s2> <ex:p2> <ex:o2>. }." \
   http://localhost:3000/myfile.ttl
 
-Modify a resource using SPARQL Update:
-
-curl -X PATCH -H "Content-Type: application/sparql-update" \
-  -d "INSERT DATA { <ex:s2> <ex:p2> <ex:o2> }" \
-  http://localhost:3000/myfile.ttl
-
-HEAD: Retrieve resources headers¶
+HEAD: Retrieve resources headers
 
 curl -I -H "Accept: text/plain" \
   http://localhost:3000/myfile.txt
@@ -117,74 +108,15 @@ OPTIONS: Retrieve resources communication options¶
 
 curl -X OPTIONS -i http://localhost:3000/myfile.txt
 
-
-
 - les dossiers aussi appelés folders ou containers se terminent TOUJOURS par '/'
 - Les clés ("accept", "content-type"...) des headers doivent être en miniscule.
     - Pour déplacer un fichier, il faut d'abord créer la copie avec PUT, puis supprimer l'ancien avec DELETE.`,
     inputSchema: { url: z.string(), method: z.string().optional(), headers: z.record(z.string(), z.string()).optional(), body: z.string().optional() }
 },
 
-    async ({ url, method = "GET", headers, body }) => {
+    async ({ url, method, headers, body }) => {
+        return sop.fetch({ url, method, headers, body })
 
-        let options = {
-            method: method,
-            headers: headers,
-        }
-        if (body != undefined && body.length > 0) {
-            options.body = body
-        }
-        console.log(options)
-        try {
-            let result = await session.fetch(url, options)
-            // console.log(result)
-            let message = {
-                "status": result.status,
-                "statusText": result.statusText,
-                "ok": result.ok,
-                "url": url,
-                "options": options,
-                "session": session.info
-            }
-            if (result.headers.get("location") != undefined) {
-                message.location = result.headers.get("location")
-            }
-
-            if (headers.accept == 'application/json' ||
-                headers.accept == 'application/ld+json' ||
-                headers.Accept == 'application/json' ||
-                headers.Accept == 'application/ld+json') {
-                let body_json = await result.json()
-                if (method == "GET" && url.endsWith('/')) {
-                    // alléger la réponse liste  contenu d'un dossier 
-                    let short_body_json = body_json.map((f) => {
-                        if (f['@id'] != url) {
-                            return { "@id": f['@id'] }
-                        }
-                    })
-                    message.body = [...new Set(short_body_json.filter(n => n))]; //remove null & unique
-                } else {
-                    message.body = body_json
-                }
-
-            } else {
-                message.body = await result.text()
-            }
-            // let content = [{ type: "text", text: String(JSON.stringify({ url: url })) }]
-            let content = [{ type: "text", text: String(JSON.stringify(message)) }]
-            return { content: content }
-        } catch (e) {
-            console.log(e, options)
-            let content = [{
-                type: "text", text: String(JSON.stringify({
-                    "status": "ko",
-                    "result": e, "url": url,
-                    "options": options,
-                    "session": session.info
-                }))
-            }]
-            return { content: content }
-        }
     }
 
 )
