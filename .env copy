@@ -10,4 +10,6 @@ PASSWORD=xxxx
 OPENAI_API_KEY=sk-xxx
 OPENAI_BASE_URL="https://provider.domain/v1"
 MODEL="model"
+MODEL_SMALL="model_small"
+MODEL_EMBEDDING=
 

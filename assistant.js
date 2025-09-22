@@ -2,11 +2,11 @@
 
 import { MCPClient } from "./src/mcpClient.js";
 
-import { SolidOperations } from './src/solidOperations.js';
+// import { SolidOperations } from './src/solidOperations.js';
 
-let sop = new SolidOperations()
+// let sop = new SolidOperations()
 
-await sop.init()
+// await sop.init()
 
 
 const systemPrompt = `Tu es Dr Know, expert en Web sémantique, RDF, jsonld, turtle/n3.

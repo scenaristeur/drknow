@@ -4,15 +4,19 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import readline from "readline/promises";
 import { LlmClient } from "./llmClient.js";
+import { BashCommands } from "./BashCommands.js"
 
+const bc = new BashCommands()
 
 export class MCPClient {
 
     constructor(options) {
-        this.session = options.session
-        this.pod = options.pod
+        // this.session = options.session
+        // this.pod = options.pod
         this.messages = options.messages
         this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
+        // console.log("pod", this.pod)
+        // this.pod.current = this.pod.storage
     }
 
     async connectToServer(serverScriptPath) {
@@ -68,20 +72,31 @@ export class MCPClient {
             console.log("Type your queries or 'quit' to exit.");
             console.log("Tu peux commencer par taper 'dossiers' pour lister les dossiers.");
             console.log("Pour consulter les messages, tape 'messages'");
+            // console.log("bash commandes: ", bc.commands)
 
             while (true) {
                 const message = await rl.question("\nQuery: ");
                 if (message.toLowerCase() === "quit") {
                     break;
                 }
-                if (message.toLocaleLowerCase() === 'messages') {
+                if (message.toLowerCase() === 'messages') {
                     this.llm_client.log_messages()
                 } else {
-                    // const response = await this.processQuery(message);
-                    const response = await this.llm_client.processQuery(message)
-                    console.log("\n" + response);
-                }
+                    // let msg_split = message.trim().split(" ")
+                    // let cmd_potentielle = msg_split.shift().toLowerCase()
+                    // let complement = ""
+                    // if (bc.commands.includes(cmd_potentielle)) {
 
+                    //     const args = msg_split.join(" ")
+                    //     console.log("args", args)
+                    //     complement = "\n" + await bc[cmd_potentielle](args, this.mcp)
+                    // }
+
+                    // const response = await this.llm_client.processQuery(message+complement)
+                    const response = await this.llm_client.processQuery(message)
+                    console.log("\nmcpclient , add to messages ?" + response);
+
+                }
             }
         } finally {
             rl.close();
