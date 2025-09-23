@@ -23,7 +23,7 @@ seulement "[TOOL_CALLS]commande{parametres}" rien d'autre !!!
 Pour avoir des informations meta, par exemple le contenu d'un dossier, tu peux ajouter .meta à la fin de l'url. pour connaitre les permissions, c'est .acl.
 exemple pour lister 'url=http://localhost:3000/david/holacratie/.meta'
 `
-
+// const systemPrompt = ""
 
 const options = {
     messages: [{

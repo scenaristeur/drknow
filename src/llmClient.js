@@ -15,42 +15,113 @@ export class LlmClient {
             apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
             baseURL: process.env['OPENAI_BASE_URL']
         });
-        this.loops = 5
-        this.steps = []
+
+
     }
 
     async processQuery(query) {
-        this.steps = []
-        let validation = false
-        let loops = this.loops
-        while (this.steps.length < loops && !validation) {
-            const step = this.steps.length
-            console.log(step)
-            let result = await this.ask(query, this.steps)
-            validation = await this.validation(query, this.steps)
+        try {
+            this.messages.push(
+                {
+                    role: "user",
+                    content: query,
+                })
+
+            const response = await this.client.chat.completions.create({
+                model: process.env['MODEL'],
+                // max_tokens: 1000,
+                messages: this.messages,
+                tools: this.tools,
+                // tool_choice: "auto"
+            });
+
+
+            // console.log(response.choices[0].message.content)
+            let msg = response.choices[0].message
+            // console.log(msg)
+            // console.log(msg.tool_calls)
+            // console.log(msg.content)
+            this.messages.push({
+                role: "assistant",
+                content: msg.content,
+            });
+
+            const finalText = [];
+            finalText.push(msg.content)
+
+            console.log("\nCONTENT", msg.content)
+            let calls = extractToolCalls(msg.content)
+            console.log("\nCALLS", calls)
+            for (const call_tool of calls) {
+                // if (content.type === "text") {
+                //     finalText.push(content.text);
+                // } else if (content.type === "tool_use") {
+                // console.log("call:", call_tool)
+                // this.messages.push({
+                //     role: "assistant",
+                //     content: JSON.stringify(call_tool),
+                // });
+                let tool_names = this.tools.map((tool) => tool.function.name)
+                // console.log("toolArgs", call_tool.toolArgs)
+                if (tool_names.includes(call_tool.toolName)) {
+                    // console.log("toolname", call_tool.toolName)
+                    // console.log("toolArgs", call_tool.toolArgs)
+                    const result = await this.mcp.callTool({
+                        name: call_tool.toolName,
+                        arguments: call_tool.toolArgs,
+                    });
+                    console.log("RESULT:", result)
+                    finalText.push(
+                        `[Calling tool ${call_tool.toolName} with args ${JSON.stringify(call_tool.toolArgs)}]`
+                    );
+                    this.messages.push({
+                        role: "user",
+                        content: result.content[0].text,
+                    });
+                } else {
+                    console.log(" !!Pas de tool nommé __", call_tool.toolName) + "__"
+                    this.messages.push({
+                        role: "user",
+                        content: "!!Pas de tool nommé __" + call_tool.toolName + "__",
+                    });
+                }
+                // console.log(result.content[0])
 
 
 
-            this.steps.push({
-                step: step,
-                result: result,
-                validation: validation
-            })
+
+
+
+                // }
+            }
+
+            // console.log("THIS MESSAAGES TO SEND : ", this.messages)
+
+            const response_after = await this.client.chat.completions.create({
+                model: process.env['MODEL'],
+                // max_tokens: 1000,
+                messages: this.messages,
+                // tools: this.tools
+            });
+            let response_after_result = response_after.choices[0].message.content
+            // console.log(response_after.choices[0])
+            finalText.push(
+                response_after_result
+            );
+            this.messages.push({
+                role: "assistant",
+                content: response_after_result,
+            });
+            // console.log("###MESSAGES/n", this.messages)
+            return finalText.join("\n");
         }
-        let synthese = await this.synthese(query, this.steps)
-
-        return JSON.stringify({ synthese: synthese, steps: this.steps })
+        catch (e) {
+            console.log("!!!!!!!\nERREUR: ", e)
+        }
     }
 
-    async ask(query, steps) {
-        return "reponse"
-    }
-    async validation(query, steps) {
-        return Math.random() < 0.4
+    log_messages() {
+        console.log(this.messages)
     }
 
-
-    async synthese(query, steps) {
-        return "synthese"
-    }
 }
